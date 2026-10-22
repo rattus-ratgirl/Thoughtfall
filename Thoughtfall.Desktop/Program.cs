@@ -11,6 +11,9 @@ internal static class Program
     {
         try
         {
+            // Inno Setup checks this marker before installing or uninstalling.
+            // It never owns the mutex or closes the app, so drafts can be saved normally.
+            using var installerMarker = OperatingSystem.IsWindows() ? new Mutex(false, @"Local\Thoughtfall.Running") : null;
             var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             if (string.IsNullOrWhiteSpace(home))
             {
