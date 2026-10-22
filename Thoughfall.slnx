@@ -1,5 +1,0 @@
-<Solution>
-    <Project Path="Thoughfall.Application/Thoughfall.Application.csproj" />
-    <Project Path="Thoughfall.Desktop/Thoughfall.Desktop.csproj" />
-    <Project Path="Thoughfall.Tests/Thoughfall.Tests.csproj" />
-</Solution>

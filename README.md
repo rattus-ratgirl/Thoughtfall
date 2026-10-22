@@ -1,4 +1,4 @@
-# Thoughfall
+# Thoughtfall
 
 A small local diary for Windows and Linux, built with Avalonia on .NET 10.
 
@@ -7,10 +7,10 @@ A small local diary for Windows and Linux, built with Avalonia on .NET 10.
 Install the .NET 10 SDK, then run:
 
 ```sh
-dotnet run --project Thoughfall.Desktop
+dotnet run --project Thoughtfall.Desktop
 ```
 
-Open `Thoughfall.slnx` in your IDE and select `Thoughfall.Desktop` to debug. Linux needs a graphical desktop with Avalonia's X11/font dependencies. A tray indicator is optional.
+Open `Thoughtfall.slnx` in your IDE and select `Thoughtfall.Desktop` to debug. Linux needs a graphical desktop with Avalonia's X11/font dependencies. A tray indicator is optional.
 
 - Capture opens on launch. **Ctrl+Enter** or **Save** saves the exact text; **Enter** inserts a newline.
 - The editor is disabled while saving. Success clears it and hides or minimizes capture. Failure retains the draft and shows an error.
@@ -22,7 +22,7 @@ Drafts exist only in memory until saved. The app does not register a global shor
 
 ## Storage
 
-The SQLite database is **`~/.thoughtfall/data.db3`**, where `~` is the user's home directory (`%USERPROFILE%` on Windows). The directory spelling is `thoughtfall`; the application name remains Thoughfall.
+The SQLite database is **`~/.thoughtfall/data.db3`**, where `~` is the user's home directory (`%USERPROFILE%` on Windows).
 
 The database is created on the first save or export. Schema version 1 contains a single `entries` table:
 
@@ -53,17 +53,17 @@ Exports are written to a temporary file alongside the destination, flushed, then
 
 | Project | Responsibility |
 | --- | --- |
-| `Thoughfall.Desktop` | Startup, application lifetime, code-behind windows, tray, file picker, and single-instance activation |
-| `Thoughfall.Application` | Typed entries, SQLite storage, inclusive selection, and JSON/Markdown formatting |
-| `Thoughfall.Tests` | Public-method unit tests using in-memory inputs and outputs |
+| `Thoughtfall.Desktop` | Startup, application lifetime, code-behind windows, tray, file picker, and single-instance activation |
+| `Thoughtfall.Application` | Typed entries, SQLite storage, inclusive selection, and JSON/Markdown formatting |
+| `Thoughtfall.Tests` | Public-method unit tests using in-memory inputs and outputs |
 
 Startup constructs dependencies directly. `ApplicationController` owns desktop coordination; `TrayMenu` owns the tray; each window owns its UI interactions. `DiaryStore` owns database access and export destination policy. `DiaryEntries` and `DiaryExport` provide in-memory selection and formatting. There is no DI container, generic repository, or UI test framework.
 
 ## Build and unit tests
 
 ```sh
-dotnet build Thoughfall.slnx -c Release -warnaserror
-dotnet test Thoughfall.Tests -c Release --no-build --results-directory artifacts/test-results
+dotnet build Thoughtfall.slnx -c Release -warnaserror
+dotnet test Thoughtfall.Tests -c Release --no-build --results-directory artifacts/test-results
 ```
 
 Tests cover entry invariants, exact Unicode/large-text export, inclusive recorded-offset dates, clock-change ordering, JSON structure, Markdown quotation/newlines, and caller-owned stream/writer lifetime. They call public members with in-memory values only.
@@ -87,8 +87,8 @@ CSharpier formats C# and XML/XAML. The pre-commit hook formats staged files. Sty
 Publish self-contained folders; copy the entire output directory, including native SQLite and Avalonia libraries:
 
 ```sh
-dotnet publish Thoughfall.Desktop -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -p:PublishTrimmed=false -o artifacts/publish/win-x64 -warnaserror
-dotnet publish Thoughfall.Desktop -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=false -p:PublishTrimmed=false -o artifacts/publish/linux-x64 -warnaserror
+dotnet publish Thoughtfall.Desktop -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -p:PublishTrimmed=false -o artifacts/publish/win-x64 -warnaserror
+dotnet publish Thoughtfall.Desktop -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=false -p:PublishTrimmed=false -o artifacts/publish/linux-x64 -warnaserror
 ```
 
-Run `Thoughfall.Desktop.exe` on Windows or `Thoughfall.Desktop` on Linux. Linux still needs its desktop/native system dependencies; a cross-platform publish does not validate those. No installer is provided.
+Run `Thoughtfall.Desktop.exe` on Windows or `Thoughtfall.Desktop` on Linux. Linux still needs its desktop/native system dependencies; a cross-platform publish does not validate those. No installer is provided.
