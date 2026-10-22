@@ -1,0 +1,64 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="Thoughfall.Desktop.ExportWindow"
+    x:ClassModifier="internal"
+    Title="Export entries — Thoughfall"
+    Icon="/Assets/Thoughfall.ico"
+    Width="580"
+    SizeToContent="Height"
+    CanResize="False"
+    WindowStartupLocation="CenterScreen"
+>
+    <StackPanel Margin="32,28" Spacing="24">
+        <StackPanel Spacing="8">
+            <TextBlock Text="Export entries" Classes="heading" />
+            <TextBlock Text="Take a little of your journal with you." Classes="secondary" />
+        </StackPanel>
+        <Border
+            Background="{DynamicResource SurfaceBrush}"
+            BorderBrush="{DynamicResource StrokeBrush}"
+            BorderThickness="1"
+            CornerRadius="14"
+            Padding="24"
+        >
+            <StackPanel Spacing="20">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Date range" FontWeight="SemiBold" />
+                    <Grid x:Name="DateFields" ColumnDefinitions="*,16,*">
+                        <StackPanel Spacing="6">
+                            <Label Content="_From" Target="{Binding #FromDate}" Padding="0" />
+                            <CalendarDatePicker x:Name="FromDate" HorizontalAlignment="Stretch" AutomationProperties.Name="From date (inclusive)" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Spacing="6">
+                            <Label Content="_To" Target="{Binding #ToDate}" Padding="0" />
+                            <CalendarDatePicker x:Name="ToDate" HorizontalAlignment="Stretch" AutomationProperties.Name="To date (inclusive)" />
+                        </StackPanel>
+                    </Grid>
+                    <TextBlock Classes="secondary" TextWrapping="Wrap" Text="Both dates include the whole day, using each entry's recorded date." />
+                </StackPanel>
+                <Border Height="1" Background="{DynamicResource StrokeBrush}" />
+                <StackPanel Spacing="8">
+                    <Label Content="File _format" Target="{Binding #FormatPicker}" Padding="0" />
+                    <ComboBox x:Name="FormatPicker" SelectedIndex="0" HorizontalAlignment="Stretch" AutomationProperties.Name="Export format">
+                        <ComboBoxItem Content="Structured JSON (.json)" />
+                        <ComboBoxItem Content="Markdown (.md)" />
+                    </ComboBox>
+                    <TextBlock Classes="secondary" Text="Organised by year → month → day." />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+        <Border x:Name="StatusBanner" Classes="notice" IsVisible="False">
+            <ScrollViewer MaxHeight="140">
+                <TextBlock x:Name="StatusText" TextWrapping="Wrap" FontSize="12" />
+            </ScrollViewer>
+        </Border>
+        <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Text="Your diary stays unchanged." Classes="secondary" VerticalAlignment="Center" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                <Button x:Name="CloseButton" Content="Close" Classes="quiet" MinWidth="80" Click="OnClose" />
+                <Button x:Name="ExportButton" Content="Export…" Classes="primary" Click="OnExport" />
+            </StackPanel>
+        </Grid>
+    </StackPanel>
+</Window>

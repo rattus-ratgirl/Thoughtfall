@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <ApplicationIcon>Assets/Thoughfall.ico</ApplicationIcon>
+        <Description>A quiet diary for thoughts as they happen.</Description>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="../Thoughfall.Application/Thoughfall.Application.csproj" />
+        <PackageReference Include="Avalonia" />
+        <PackageReference Include="Avalonia.Desktop" />
+        <PackageReference Include="Avalonia.Themes.Fluent" />
+        <PackageReference Include="Avalonia.Fonts.Inter" />
+        <AvaloniaResource Include="Assets/Thoughfall.ico" />
+    </ItemGroup>
+</Project>

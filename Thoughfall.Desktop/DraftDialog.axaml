@@ -1,0 +1,23 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="Thoughfall.Desktop.DraftDialog"
+    x:ClassModifier="internal"
+    Title="Thoughfall"
+    Width="460"
+    SizeToContent="Height"
+    CanResize="False"
+    WindowStartupLocation="CenterOwner"
+>
+    <StackPanel Margin="28" Spacing="24">
+        <StackPanel Spacing="8">
+            <TextBlock Text="Keep this thought?" FontSize="24" FontWeight="SemiBold" />
+            <TextBlock Text="Save your unfinished entry before quitting." Classes="secondary" TextWrapping="Wrap" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+            <Button Content="Cancel" MinWidth="88" Classes="quiet" IsCancel="True" Click="OnCancel" />
+            <Button Content="Discard" MinWidth="88" Classes="quiet" Click="OnDiscard" />
+            <Button Content="Save" MinWidth="88" Classes="primary" IsDefault="True" Click="OnSave" />
+        </StackPanel>
+    </StackPanel>
+</Window>
