@@ -1,0 +1,44 @@
+name: Submit winget release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Existing signed stable release version'
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+    secrets:
+      WINGET_CREATE_GITHUB_TOKEN:
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: winget-submission
+  cancel-in-progress: false
+jobs:
+  submit:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install pinned winget client
+        shell: pwsh
+        run: ./scripts/Install-WingetForCI.ps1
+      - name: Submit verified published installer
+        shell: pwsh
+        env:
+          VERSION: ${{ inputs.version }}
+          GH_TOKEN: ${{ github.token }}
+          WINGET_CREATE_GITHUB_TOKEN: ${{ secrets.WINGET_CREATE_GITHUB_TOKEN }}
+        run: ./scripts/Submit-Winget.ps1 -Version $env:VERSION
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: winget-manifests
+          path: artifacts/winget-download/*/generated/manifests

@@ -2,6 +2,15 @@
 
 A small local diary for Windows and Linux, built with Avalonia on .NET 10.
 
+## Windows releases
+
+Windows installers are published through GitHub Actions to [GitHub Releases](https://github.com/rattus-ratgirl/Thoughtfall/releases).
+The installer bundles .NET, installs for the current user, and adds a Start menu shortcut.
+Quit Thoughtfall before upgrading or uninstalling; your diary is retained.
+
+Initial previews are unsigned. Signed stable releases and the planned winget package `Ratgirl.Thoughtfall` require SignPath onboarding and community repository acceptance.
+See [Publishing](docs/PUBLISHING.md) for setup and release instructions, and [Code signing policy](docs/CODE-SIGNING.md) for signing status and responsibilities.
+
 ## Run
 
 Install the .NET 10 SDK, then run:
@@ -91,4 +100,4 @@ dotnet publish Thoughtfall.Desktop -c Release -r win-x64 --self-contained true -
 dotnet publish Thoughtfall.Desktop -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=false -p:PublishTrimmed=false -o artifacts/publish/linux-x64 -warnaserror
 ```
 
-Run `Thoughtfall.Desktop.exe` on Windows or `Thoughtfall.Desktop` on Linux. Linux still needs its desktop/native system dependencies; a cross-platform publish does not validate those. No installer is provided.
+Run `Thoughtfall.Desktop.exe` on Windows or `Thoughtfall.Desktop` on Linux. Linux still needs its desktop/native system dependencies; a cross-platform publish does not validate those. Windows installer builds are described in [Publishing](docs/PUBLISHING.md).

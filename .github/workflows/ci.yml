@@ -1,0 +1,45 @@
+name: Build and test
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+permissions:
+  contents: read
+env:
+  AVALONIA_TELEMETRY_OPTOUT: '1'
+  DOTNET_NOLOGO: '1'
+jobs:
+  build:
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet build Thoughtfall.slnx -c Release -warnaserror
+      - run: dotnet test Thoughtfall.Tests -c Release --no-build --results-directory artifacts/test-results
+      - name: Check release version validation
+        shell: pwsh
+        run: ./scripts/Test-ReleaseScripts.ps1
+      - name: Build installer
+        shell: pwsh
+        run: |
+          $compiler = ./scripts/Get-ReleaseTool.ps1 -Tool InnoSetup
+          ./scripts/Build-Windows.ps1 -Version 0.0.0 -IsccPath $compiler
+      - name: Smoke-test installer on disposable runner
+        shell: pwsh
+        run: ./scripts/Test-WindowsInstaller.ps1 -Version 0.0.0
+      - name: Validate winget metadata
+        shell: pwsh
+        run: |
+          ./scripts/Install-WingetForCI.ps1
+          $manifest = ./scripts/New-WingetManifest.ps1 -Version 0.0.0 -InstallerPath ./artifacts/installers/0.0.0/Thoughtfall-0.0.0-win-x64-setup.exe -OutputDirectory ./artifacts/manifest-check
+          winget validate --manifest $manifest
+          if ($LASTEXITCODE -ne 0) { throw 'Manifest validation failed.' }
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: unsigned-test-installer
+          path: artifacts/installers/0.0.0/*.exe
+          if-no-files-found: error
