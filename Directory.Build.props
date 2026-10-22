@@ -4,6 +4,13 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <Version Condition="'$(Version)' == ''">0.1.0</Version>
+        <Product>Thoughtfall</Product>
+        <Company>ratgirl</Company>
+        <Authors>ratgirl</Authors>
+        <Copyright>Copyright © 2026 ratgirl</Copyright>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryUrl>https://github.com/rattus-ratgirl/Thoughtfall</RepositoryUrl>
     </PropertyGroup>
     <ItemGroup>
         <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" />
