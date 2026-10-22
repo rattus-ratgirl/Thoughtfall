@@ -5,8 +5,10 @@ using System.Text.Json;
 using NUnit.Framework;
 using Thoughfall.Application;
 
+/// <summary>Checks JSON and Markdown exports using in-memory destinations.</summary>
 public sealed class DiaryExportTests
 {
+    /// <summary>Checks the JSON contract, exact entry values, and stream ownership.</summary>
     [Test]
     public void WriteJsonPreservesExistingExportShapeAndExactEntryData()
     {
@@ -32,6 +34,7 @@ public sealed class DiaryExportTests
         });
     }
 
+    /// <summary>Checks chronological JSON groups and entry ordering.</summary>
     [Test]
     public void WriteJsonGroupsAndOrdersAcrossYearsMonthsAndDays()
     {
@@ -63,6 +66,7 @@ public sealed class DiaryExportTests
         });
     }
 
+    /// <summary>Checks that large Unicode entries are exported without truncation.</summary>
     [Test]
     public void WriteJsonPreservesLargeText()
     {
@@ -77,6 +81,7 @@ public sealed class DiaryExportTests
         );
     }
 
+    /// <summary>Checks the JSON representation of an empty export.</summary>
     [Test]
     public void WriteJsonWithNoEntriesProducesEmptyObject()
     {
@@ -87,6 +92,7 @@ public sealed class DiaryExportTests
         Assert.That(document.RootElement.EnumerateObject(), Is.Empty);
     }
 
+    /// <summary>Checks Markdown quotation, LF output, and caller-owned writer settings.</summary>
     [Test]
     public void WriteMarkdownQuotesTextAndNormalizesNewlinesWithoutChangingWriter()
     {
@@ -104,6 +110,7 @@ public sealed class DiaryExportTests
         Assert.DoesNotThrow(() => writer.Write("still open"));
     }
 
+    /// <summary>Checks entry ordering and culture-independent date headings.</summary>
     [Test]
     public void WriteMarkdownOrdersEntriesAndUsesInvariantHeadings()
     {
@@ -122,6 +129,7 @@ public sealed class DiaryExportTests
         });
     }
 
+    /// <summary>Checks that an empty Markdown export contains only its title.</summary>
     [Test]
     public void WriteMarkdownWithNoEntriesProducesTitle()
     {
@@ -131,6 +139,7 @@ public sealed class DiaryExportTests
         Assert.That(writer.ToString(), Is.EqualTo("# Thoughfall\n\n"));
     }
 
+    /// <summary>Checks that both formatters reject a null destination.</summary>
     [Test]
     public void WritersRejectNullOutput()
     {
@@ -138,6 +147,7 @@ public sealed class DiaryExportTests
         Assert.Throws<ArgumentNullException>(() => DiaryExport.WriteMarkdown(null!, []));
     }
 
+    /// <summary>Checks that null entries are rejected before any output is written.</summary>
     [Test]
     public void WritersRejectNullEntriesBeforeWriting()
     {

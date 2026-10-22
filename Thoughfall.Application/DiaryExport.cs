@@ -3,9 +3,12 @@ namespace Thoughfall.Application;
 using System.Globalization;
 using System.Text.Json;
 
+/// <summary>Formats diary entries as grouped JSON or Markdown.</summary>
 public static class DiaryExport
 {
     /// <summary>Writes year/month/day groups without closing the caller's stream.</summary>
+    /// <param name="output">The destination stream.</param>
+    /// <param name="entries">The entries to order and export.</param>
     public static void WriteJson(Stream output, IEnumerable<DiaryEntry> entries)
     {
         ArgumentNullException.ThrowIfNull(output);
@@ -42,7 +45,9 @@ public static class DiaryExport
         writer.WriteEndObject();
     }
 
-    /// <summary>Writes quoted entry text with LF newlines, leaving the caller's writer open and unchanged.</summary>
+    /// <summary>Writes quoted text with LF newlines without closing the writer or changing its newline setting.</summary>
+    /// <param name="output">The destination writer.</param>
+    /// <param name="entries">The entries to order and export.</param>
     public static void WriteMarkdown(TextWriter output, IEnumerable<DiaryEntry> entries)
     {
         ArgumentNullException.ThrowIfNull(output);

@@ -3,6 +3,7 @@ namespace Thoughfall.Desktop;
 using Avalonia;
 using Thoughfall.Application;
 
+/// <summary>Starts the desktop application or activates its running instance.</summary>
 internal static class Program
 {
     [STAThread]

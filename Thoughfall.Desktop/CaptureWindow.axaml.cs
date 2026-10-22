@@ -6,6 +6,7 @@ using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Thoughfall.Application;
 
+/// <summary>Captures a draft and retains it until saving succeeds.</summary>
 internal partial class CaptureWindow : Window
 {
     private readonly DiaryStore _store;
@@ -13,6 +14,8 @@ internal partial class CaptureWindow : Window
     private bool _saving;
     private bool _acceptingOperations = true;
 
+    /// <summary>Initializes a new instance of the <see cref="CaptureWindow"/> class.</summary>
+    /// <param name="store">The store receiving saved entries.</param>
     internal CaptureWindow(DiaryStore store)
     {
         _store = store;
@@ -21,18 +24,25 @@ internal partial class CaptureWindow : Window
         EntryDate.Text = DateTime.Now.ToString("ddd, d MMM");
     }
 
+    /// <summary>Occurs when the user requests the export window.</summary>
     internal event EventHandler? ExportRequested;
 
+    /// <summary>Occurs when the user requests the data folder.</summary>
     internal event EventHandler? OpenFolderRequested;
 
+    /// <summary>Occurs when the user requests application shutdown.</summary>
     internal event EventHandler? QuitRequested;
 
+    /// <summary>Gets or sets a value indicating whether capture can hide instead of minimizing.</summary>
     internal bool CanHide { get; set; }
 
+    /// <summary>Gets a value indicating whether the editor contains a nonblank draft.</summary>
     internal bool HasDraft => !string.IsNullOrWhiteSpace(Editor.Text);
 
+    /// <summary>Gets the most recent save task, or null before the first save.</summary>
     internal Task<bool>? ActiveSave { get; private set; }
 
+    /// <summary>Restores and activates capture, then focuses the editor.</summary>
     internal void ShowCapture()
     {
         EntryDate.Text = DateTime.Now.ToString("ddd, d MMM");
@@ -42,12 +52,16 @@ internal partial class CaptureWindow : Window
         Dispatcher.UIThread.Post(() => Editor.Focus(), DispatcherPriority.Input);
     }
 
+    /// <summary>Enables or blocks user editing and save requests.</summary>
+    /// <param name="accepting">Whether new user operations are allowed.</param>
     internal void SetAcceptingOperations(bool accepting)
     {
         _acceptingOperations = accepting;
         UpdateControls();
     }
 
+    /// <summary>Saves the draft or joins the save already in progress.</summary>
+    /// <returns>Whether the draft was saved successfully.</returns>
     internal Task<bool> SaveEntryAsync()
     {
         if (ActiveSave is { IsCompleted: false })
@@ -101,18 +115,22 @@ internal partial class CaptureWindow : Window
         }
     }
 
+    /// <summary>Updates the status banner, hiding it for empty text.</summary>
+    /// <param name="text">The message to display, or null to clear it.</param>
     internal void SetStatus(string? text)
     {
         StatusText.Text = text;
         StatusBanner.IsVisible = !string.IsNullOrEmpty(text);
     }
 
+    /// <summary>Closes capture without applying its normal hide-or-minimize behavior.</summary>
     internal void CloseForExit()
     {
         _closingForExit = true;
         Close();
     }
 
+    /// <inheritdoc />
     protected override void OnClosing(WindowClosingEventArgs e)
     {
         if (!_closingForExit)

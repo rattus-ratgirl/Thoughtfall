@@ -4,6 +4,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
 using Thoughfall.Application;
 
+/// <summary>Coordinates desktop windows, tray actions, and orderly shutdown.</summary>
 internal sealed class ApplicationController : IDisposable
 {
     private readonly DiaryStore _store;
@@ -16,6 +17,11 @@ internal sealed class ApplicationController : IDisposable
     private bool _exiting;
     private bool _disposed;
 
+    /// <summary>Initializes a new instance of the <see cref="ApplicationController"/> class.</summary>
+    /// <param name="app">The application hosting the tray.</param>
+    /// <param name="store">The shared diary store.</param>
+    /// <param name="desktop">The desktop lifetime to shut down.</param>
+    /// <param name="instance">The activation listener to stop before exit.</param>
     internal ApplicationController(
         Avalonia.Application app,
         DiaryStore store,
@@ -39,8 +45,10 @@ internal sealed class ApplicationController : IDisposable
         desktop.ShutdownRequested += OnShutdownRequested;
     }
 
+    /// <summary>Gets the application's capture window.</summary>
     internal CaptureWindow Capture { get; }
 
+    /// <summary>Activates capture unless shutdown has begun.</summary>
     internal void ActivateCapture()
     {
         if (!_quitting && !_exiting && !_disposed)
@@ -49,6 +57,7 @@ internal sealed class ApplicationController : IDisposable
         }
     }
 
+    /// <summary>Reports that shortcut activation has stopped working.</summary>
     internal void ShowActivationError()
     {
         if (!_exiting && !_disposed)
@@ -187,6 +196,7 @@ internal sealed class ApplicationController : IDisposable
         }
     }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         if (_disposed)

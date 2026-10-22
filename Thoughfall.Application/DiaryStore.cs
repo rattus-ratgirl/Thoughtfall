@@ -8,16 +8,22 @@ public sealed class DiaryStore
 {
     private readonly SemaphoreSlim _gate = new(1, 1);
 
+    /// <summary>Initializes a new instance of the <see cref="DiaryStore"/> class.</summary>
+    /// <param name="folder">The private diary data directory.</param>
     public DiaryStore(string folder)
     {
         Folder = DataPaths.ResolveDirectory(folder);
     }
 
+    /// <summary>Gets the absolute data directory with directory links resolved.</summary>
     public string Folder { get; }
 
+    /// <summary>Gets the SQLite database path.</summary>
     public string FilePath => Path.Combine(Folder, "data.db3");
 
     /// <summary>Commits the exact text as one entry. Blank input is ignored.</summary>
+    /// <param name="text">The entry text to save.</param>
+    /// <returns>Whether a nonblank entry was saved.</returns>
     public async Task<bool> SaveAsync(string text)
     {
         if (string.IsNullOrWhiteSpace(text))
@@ -54,6 +60,9 @@ public sealed class DiaryStore
     }
 
     /// <summary>Materializes a snapshot before releasing database access.</summary>
+    /// <param name="from">The inclusive first recorded date.</param>
+    /// <param name="to">The inclusive last recorded date.</param>
+    /// <returns>The matching entries in diary order.</returns>
     public async Task<IReadOnlyList<DiaryEntry>> ReadRangeAsync(DateOnly from, DateOnly to)
     {
         if (from > to)
@@ -84,6 +93,11 @@ public sealed class DiaryStore
         }
     }
 
+    /// <summary>Writes an export outside the data directory, replacing the destination only after a successful write.</summary>
+    /// <param name="destination">The local output path.</param>
+    /// <param name="entries">The snapshot to export.</param>
+    /// <param name="format">The output format.</param>
+    /// <returns>A task completing when the export has been written.</returns>
     public Task ExportAsync(string destination, IReadOnlyList<DiaryEntry> entries, ExportFormat format)
     {
         ArgumentNullException.ThrowIfNull(entries);
@@ -127,10 +141,9 @@ public sealed class DiaryStore
             if (version == 0)
             {
                 command.CommandText = "SELECT COUNT(*) FROM sqlite_schema WHERE name NOT LIKE 'sqlite_%'";
+
                 if (Convert.ToInt32(command.ExecuteScalar(), CultureInfo.InvariantCulture) != 0)
-                {
                     throw new InvalidDataException("The database has an unrecognized schema. It has not been replaced.");
-                }
 
                 command.CommandText = """
                     CREATE TABLE entries (
@@ -140,6 +153,7 @@ public sealed class DiaryStore
                     );
                     PRAGMA user_version = 1;
                     """;
+
                 command.ExecuteNonQuery();
             }
             else if (version != 1)

@@ -6,12 +6,15 @@ using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using Thoughfall.Application;
 
+/// <summary>Collects export options and writes a saved-entry snapshot.</summary>
 internal partial class ExportWindow : Window
 {
     private readonly DiaryStore _store;
     private bool _exporting;
     private bool _acceptingOperations = true;
 
+    /// <summary>Initializes a new instance of the <see cref="ExportWindow"/> class.</summary>
+    /// <param name="store">The store providing snapshots and export writes.</param>
     internal ExportWindow(DiaryStore store)
     {
         _store = store;
@@ -23,8 +26,10 @@ internal partial class ExportWindow : Window
         ToDate.SelectedDate = today;
     }
 
+    /// <summary>Gets the most recent export task, including picker interaction, or null before the first export.</summary>
     internal Task<bool>? ActiveExport { get; private set; }
 
+    /// <summary>Restores and activates the export window.</summary>
     internal void ShowExport()
     {
         Show();
@@ -32,12 +37,15 @@ internal partial class ExportWindow : Window
         Activate();
     }
 
+    /// <summary>Enables or blocks new export requests without interrupting current work.</summary>
+    /// <param name="accepting">Whether new exports are allowed.</param>
     internal void SetAcceptingOperations(bool accepting)
     {
         _acceptingOperations = accepting;
         UpdateControls();
     }
 
+    /// <inheritdoc />
     protected override void OnClosing(WindowClosingEventArgs e)
     {
         if (_exporting)

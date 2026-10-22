@@ -3,8 +3,10 @@ namespace Thoughfall.Tests;
 using NUnit.Framework;
 using Thoughfall.Application;
 
+/// <summary>Checks entry identity and exact value preservation.</summary>
 public sealed class DiaryEntryTests
 {
+    /// <summary>Checks that construction preserves text, timestamp precision, and offset.</summary>
     [Test]
     public void ConstructorPreservesTextAndTimestamp()
     {
@@ -21,12 +23,14 @@ public sealed class DiaryEntryTests
         });
     }
 
+    /// <summary>Checks that an empty UUID is rejected.</summary>
     [Test]
     public void ConstructorRejectsEmptyId()
     {
         Assert.Throws<ArgumentException>(() => new DiaryEntry(Guid.Empty, DateTimeOffset.UnixEpoch, "text"));
     }
 
+    /// <summary>Checks that null entry text is rejected.</summary>
     [Test]
     public void ConstructorRejectsNullText()
     {

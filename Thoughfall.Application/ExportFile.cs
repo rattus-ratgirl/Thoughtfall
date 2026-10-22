@@ -3,8 +3,13 @@ namespace Thoughfall.Application;
 using System.Diagnostics;
 using System.Text;
 
+/// <summary>Writes exports through a temporary file beside the destination.</summary>
 internal static class ExportFile
 {
+    /// <summary>Formats and flushes an export before replacing the destination.</summary>
+    /// <param name="destination">The validated output path.</param>
+    /// <param name="entries">The snapshot to export.</param>
+    /// <param name="format">The output format.</param>
     internal static void Write(string destination, IReadOnlyList<DiaryEntry> entries, ExportFormat format)
     {
         var temporary = Path.Combine(Path.GetDirectoryName(destination)!, $".thoughfall-export-{Guid.NewGuid():N}.tmp");

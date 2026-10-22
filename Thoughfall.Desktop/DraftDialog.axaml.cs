@@ -3,8 +3,10 @@ namespace Thoughfall.Desktop;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 
+/// <summary>Asks whether to save, discard, or keep an unsaved draft.</summary>
 internal partial class DraftDialog : Window
 {
+    /// <summary>Initializes a new instance of the <see cref="DraftDialog"/> class.</summary>
     internal DraftDialog() => InitializeComponent();
 
     private void OnCancel(object? sender, RoutedEventArgs e) => Close(DraftDecision.Cancel);

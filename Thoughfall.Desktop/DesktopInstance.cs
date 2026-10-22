@@ -4,7 +4,7 @@ using System.IO.Pipes;
 using System.Security.Cryptography;
 using System.Text;
 
-// The lock owns the data folder; the pipe carries activation requests from desktop shortcuts.
+/// <summary>Locks the data folder and carries capture requests between desktop instances.</summary>
 internal sealed class DesktopInstance : IDisposable
 {
     private readonly FileStream? _lock;
@@ -54,8 +54,12 @@ internal sealed class DesktopInstance : IDisposable
         }
     }
 
+    /// <summary>Gets a value indicating whether this instance holds the data-folder lock.</summary>
     internal bool IsOwner => _lock is not null;
 
+    /// <summary>Attempts to acquire the data-folder lock.</summary>
+    /// <param name="folder">The resolved data directory.</param>
+    /// <returns>An instance whose ownership is indicated by <see cref="IsOwner"/>.</returns>
     internal static DesktopInstance Open(string folder) => new(folder);
 
     private static bool IsLockContention(IOException error)
@@ -64,6 +68,8 @@ internal sealed class DesktopInstance : IDisposable
         return OperatingSystem.IsWindows() ? code is 32 or 33 : code is 11 or 32 or 33;
     }
 
+    /// <summary>Requests capture from the running owner, with a five-second timeout.</summary>
+    /// <returns>A task completing when the owner acknowledges the request.</returns>
     internal async Task RequestCaptureAsync()
     {
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -87,6 +93,9 @@ internal sealed class DesktopInstance : IDisposable
         }
     }
 
+    /// <summary>Starts the owner's activation listener once.</summary>
+    /// <param name="capture">The callback for a valid capture request.</param>
+    /// <param name="failed">The callback for an unexpected listener failure.</param>
     internal void Listen(Action capture, Action failed)
     {
         if (!IsOwner || _listener is not null)
@@ -140,6 +149,8 @@ internal sealed class DesktopInstance : IDisposable
         }
     }
 
+    /// <summary>Stops activation handling while retaining the data-folder lock.</summary>
+    /// <returns>A task completing when the listener has stopped.</returns>
     internal Task StopAsync() => _stopTask ??= StopCoreAsync();
 
     private async Task StopCoreAsync()
@@ -151,6 +162,7 @@ internal sealed class DesktopInstance : IDisposable
         }
     }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         if (_disposed)
