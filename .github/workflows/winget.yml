@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Existing signed stable release version'
+        description: 'Existing stable release version'
         required: true
         type: string
   workflow_call:

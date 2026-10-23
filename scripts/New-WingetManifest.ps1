@@ -12,6 +12,7 @@ New-Item $directory -ItemType Directory -Force | Out-Null
 $encoding = New-Object System.Text.UTF8Encoding $false
 $files = @{
     'Ratgirl.Thoughtfall.yaml' = @"
+# yaml-language-server: `$schema=https://aka.ms/winget-manifest.version.1.6.0.schema.json
 PackageIdentifier: Ratgirl.Thoughtfall
 PackageVersion: $Version
 DefaultLocale: en-US
@@ -19,6 +20,7 @@ ManifestType: version
 ManifestVersion: 1.6.0
 "@
     'Ratgirl.Thoughtfall.locale.en-US.yaml' = @"
+# yaml-language-server: `$schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
 PackageIdentifier: Ratgirl.Thoughtfall
 PackageVersion: $Version
 PackageLocale: en-US
@@ -40,6 +42,7 @@ ManifestType: defaultLocale
 ManifestVersion: 1.6.0
 "@
     'Ratgirl.Thoughtfall.installer.yaml' = @"
+# yaml-language-server: `$schema=https://aka.ms/winget-manifest.installer.1.6.0.schema.json
 PackageIdentifier: Ratgirl.Thoughtfall
 PackageVersion: $Version
 InstallerType: inno

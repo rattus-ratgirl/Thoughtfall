@@ -15,9 +15,9 @@ if ($LASTEXITCODE -ne 0) { throw 'Release asset download failed. Retry in a fres
 $installer = Join-Path $directory $name
 $expected = "$( (Get-FileHash $installer -Algorithm SHA256).Hash.ToLowerInvariant() )  $name"
 if ((Get-Content (Join-Path $directory 'SHA256SUMS.txt')) -cnotcontains $expected) { throw 'Release checksum mismatch.' }
-$signature = Get-AuthenticodeSignature $installer
-if ($signature.Status -ne 'Valid' -or !$signature.TimeStamperCertificate -or $signature.SignerCertificate.Subject -notmatch 'SignPath Foundation') {
-    throw 'The installer must have a valid, timestamped SignPath Foundation signature.'
+$versionInfo = (Get-Item $installer).VersionInfo
+if ($versionInfo.ProductName.Trim() -cne 'Thoughtfall' -or $versionInfo.ProductVersion.Trim() -cne $Version) {
+    throw 'Installer product metadata does not match the requested release.'
 }
 $tool = & "$PSScriptRoot/Get-ReleaseTool.ps1" -Tool WingetCreate
 $manifest = & "$PSScriptRoot/New-WingetManifest.ps1" -Version $Version -InstallerPath $installer -OutputDirectory (Join-Path $directory 'generated')

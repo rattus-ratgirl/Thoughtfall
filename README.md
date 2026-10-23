@@ -8,8 +8,8 @@ Windows installers are published through GitHub Actions to [GitHub Releases](htt
 The installer bundles .NET, installs for the current user, and adds a Start menu shortcut.
 Quit Thoughtfall before upgrading or uninstalling; your diary is retained.
 
-Initial previews are unsigned. Signed stable releases and the planned winget package `Ratgirl.Thoughtfall` require SignPath onboarding and community repository acceptance.
-See [Publishing](docs/PUBLISHING.md) for setup and release instructions, and [Code signing policy](docs/CODE-SIGNING.md) for signing status and responsibilities.
+The Windows installer is unsigned; Windows may warn about an unknown publisher or block installation. The winget package `Ratgirl.Thoughtfall` becomes available after community repository acceptance.
+See [Publishing](docs/PUBLISHING.md) for setup and release instructions, and [Code signing policy](docs/CODE-SIGNING.md) for unsigned distribution details.
 
 ## Run
 
