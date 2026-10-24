@@ -6,6 +6,8 @@
     RequestedThemeVariant="Default"
 >
     <Application.Styles>
+        <!-- Select the colour scheme here; load its Fluent theme before the shared styles. -->
+        <StyleInclude Source="/Themes/Palettes/Thoughtfall.axaml" />
         <StyleInclude Source="/Themes/Thoughtfall.axaml" />
     </Application.Styles>
 </Application>

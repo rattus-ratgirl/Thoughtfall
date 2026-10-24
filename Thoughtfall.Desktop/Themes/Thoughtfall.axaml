@@ -1,108 +1,10 @@
 <Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Styles.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.ThemeDictionaries>
-                <ResourceDictionary x:Key="Dark">
-                    <SolidColorBrush x:Key="PageBrush" Color="#174B3F" />
-                    <SolidColorBrush x:Key="SurfaceBrush" Color="#206454" />
-                    <SolidColorBrush x:Key="SurfaceHoverBrush" Color="#2B7462" />
-                    <SolidColorBrush x:Key="StrokeBrush" Color="#3D7E6D" />
-                    <SolidColorBrush x:Key="TextBrush" Color="#F5F2EA" />
-                    <SolidColorBrush x:Key="MutedTextBrush" Color="#C2D5C9" />
-                    <SolidColorBrush x:Key="AccentBrush" Color="#E7B88A" />
-                    <SolidColorBrush x:Key="PrimaryBrush" Color="#E7B88A" />
-                    <SolidColorBrush x:Key="PrimaryHoverBrush" Color="#F1CAA4" />
-                    <SolidColorBrush x:Key="PrimaryPressedBrush" Color="#D8A576" />
-                    <SolidColorBrush x:Key="PrimaryTextBrush" Color="#173F35" />
-                    <SolidColorBrush x:Key="SelectionBrush" Color="#426F5C" />
-                    <SolidColorBrush x:Key="NoticeBrush" Color="#294F41" />
-                </ResourceDictionary>
-                <ResourceDictionary x:Key="Light">
-                    <SolidColorBrush x:Key="PageBrush" Color="#F5F2EA" />
-                    <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFCF6" />
-                    <SolidColorBrush x:Key="SurfaceHoverBrush" Color="#E6EDE2" />
-                    <SolidColorBrush x:Key="StrokeBrush" Color="#C8D5C8" />
-                    <SolidColorBrush x:Key="TextBrush" Color="#233F35" />
-                    <SolidColorBrush x:Key="MutedTextBrush" Color="#52685C" />
-                    <SolidColorBrush x:Key="AccentBrush" Color="#E7B88A" />
-                    <SolidColorBrush x:Key="PrimaryBrush" Color="#206454" />
-                    <SolidColorBrush x:Key="PrimaryHoverBrush" Color="#287662" />
-                    <SolidColorBrush x:Key="PrimaryPressedBrush" Color="#184E41" />
-                    <SolidColorBrush x:Key="PrimaryTextBrush" Color="#F5F2EA" />
-                    <SolidColorBrush x:Key="SelectionBrush" Color="#DAE6D7" />
-                    <SolidColorBrush x:Key="NoticeBrush" Color="#F0E5D3" />
-                </ResourceDictionary>
-            </ResourceDictionary.ThemeDictionaries>
             <CornerRadius x:Key="ControlCornerRadius">8</CornerRadius>
             <CornerRadius x:Key="OverlayCornerRadius">12</CornerRadius>
         </ResourceDictionary>
     </Styles.Resources>
-
-    <!-- Colour the Fluent controls too, including calendar and format-picker popups. -->
-    <FluentTheme>
-        <FluentTheme.Palettes>
-            <ColorPaletteResources
-                x:Key="Dark"
-                Accent="#E7B88A"
-                RegionColor="#174B3F"
-                AltHigh="#206454"
-                AltMedium="#CC206454"
-                AltMediumHigh="#E6206454"
-                AltMediumLow="#99206454"
-                AltLow="#66206454"
-                BaseHigh="#F5F2EA"
-                BaseMediumHigh="#DCE4D8"
-                BaseMedium="#C2D5C9"
-                BaseMediumLow="#91B6A3"
-                BaseLow="#3D7E6D"
-                ChromeHigh="#7EA591"
-                ChromeMedium="#3D7E6D"
-                ChromeMediumLow="#2B7462"
-                ChromeLow="#1A5547"
-                ChromeAltLow="#206454"
-                ChromeWhite="#206454"
-                ChromeBlackHigh="#102F28"
-                ChromeBlackMedium="#80206454"
-                ChromeBlackMediumLow="#66102F28"
-                ChromeBlackLow="#33102F28"
-                ChromeDisabledHigh="#245646"
-                ChromeDisabledLow="#91B6A3"
-                ListLow="#2B7462"
-                ListMedium="#397E69"
-                ErrorText="#F2C1A3"
-            />
-            <ColorPaletteResources
-                x:Key="Light"
-                Accent="#206454"
-                RegionColor="#F5F2EA"
-                AltHigh="#FFFCF6"
-                AltMedium="#CCFFFCF6"
-                AltMediumHigh="#E6FFFCF6"
-                AltMediumLow="#99FFFCF6"
-                AltLow="#66FFFCF6"
-                BaseHigh="#233F35"
-                BaseMediumHigh="#3B5749"
-                BaseMedium="#52685C"
-                BaseMediumLow="#6D8274"
-                BaseLow="#C8D5C8"
-                ChromeHigh="#8B9F8C"
-                ChromeMedium="#C8D5C8"
-                ChromeMediumLow="#E6EDE2"
-                ChromeLow="#F5F2EA"
-                ChromeAltLow="#FFFCF6"
-                ChromeWhite="#FFFCF6"
-                ChromeBlackHigh="#233F35"
-                ChromeBlackMedium="#80233F35"
-                ChromeBlackMediumLow="#66233F35"
-                ChromeBlackLow="#33233F35"
-                ChromeDisabledHigh="#DDE3D7"
-                ChromeDisabledLow="#6D8274"
-                ListLow="#E6EDE2"
-                ListMedium="#D6E2D2"
-                ErrorText="#8B3C30"
-            />
-        </FluentTheme.Palettes>
-    </FluentTheme>
 
     <Style Selector="Window">
         <Setter Property="FontFamily" Value="fonts:Inter#Inter" />
