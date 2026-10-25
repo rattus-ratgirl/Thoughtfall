@@ -7,10 +7,13 @@ This pipeline targets Windows x64. apt, AUR, ARM64, Linux packages, and automati
 ## Publish a release
 
 1. Merge changes into the default branch (`master`) and check CI.
-2. Open **Actions ? Release Windows ? Run workflow** on the default branch. Enter a version such as `0.1.0`; there is no signing setup or channel selection.
-3. The workflow builds, runs unit tests, creates the self-contained Inno Setup installer, and tests silent installation/uninstall on a disposable runner.
-4. It verifies installer product/version metadata, computes the checksum, uploads both assets to a draft, and publishes a regular release tagged `vX.Y.Z` at the exact source commit.
-5. Download `Thoughtfall-X.Y.Z-win-x64-setup.exe` and `SHA256SUMS.txt` from the release. The release notes explain that the installer is unsigned and identify the source commit.
+2. Open **Actions → Release Windows → Run workflow** on the default branch. Select a **patch**, **minor**, or **major** bump from the latest version in `.changes`; patch is the default. There is no signing setup or channel selection.
+3. The workflow calculates and validates the version, builds, runs unit tests, creates the self-contained Inno Setup installer, and tests silent installation/uninstall on a disposable runner.
+4. Only after those checks succeed, Changie collects the unreleased fragments into `.changes/X.Y.Z.md`, removes the collected fragments, and merges the version notes into `CHANGELOG.md`. The workflow commits and pushes those files to the default branch. If that branch advanced during testing, the workflow stops rather than releasing untested changes.
+5. It verifies installer product/version metadata, computes the checksum, uploads both assets to a draft, and publishes a regular release tagged `vX.Y.Z` at the new changelog commit. The installer was built from its tested parent; the release commit changes only the changelog and fragments.
+6. Download `Thoughtfall-X.Y.Z-win-x64-setup.exe` and `SHA256SUMS.txt` from the release. Release notes include the exact collected version notes, the unsigned-installer notice, and the release commit.
+
+The workflow's `GITHUB_TOKEN` needs permission to push the changelog commit to the default branch. Repository branch rules must allow this; a rejected push stops publication. The workflow never force-pushes or bypasses branch rules. No changelog commit is made when a build or test fails, and a release with no unreleased fragments is rejected.
 
 Versions must be three integers without leading zeros or a `v` prefix, each at most 65534. Stable versions must increase. Existing tags and releases, including drafts, are never overwritten. Historical previews remain available; preview users should explicitly install the regular installer when both have the same numeric version.
 
@@ -46,6 +49,7 @@ Local-manifest configuration may require elevation. The installer itself is per-
 
 - Failed build, test, or packaging: fix the cause and rerun before publication.
 - Failed publication may leave a draft. Inspect its exact source and assets before completing it; the release workflow intentionally refuses to reuse an existing tag or draft.
+- A failure after the changelog push leaves that commit in the default branch. Inspect the generated version notes and any draft before retrying publication; starting a new workflow selects the next version and requires new fragments.
 - A published installer is immutable by policy: no `--clobber`, deleting/recreating releases, or rebuilding the same stable version. Release a higher version for corrections.
 - Winget failure does not undo a GitHub release. Check for an open or merged PR for that version before rerunning **Submit winget release**. Retry only submission; it downloads the same published bytes. Update an existing PR when appropriate rather than creating duplicates.
 - GitHub release publication and winget availability are separate milestones. A green release job does not establish Microsoft acceptance.
@@ -69,6 +73,6 @@ For a local package build, install Python 3 and Inno Setup 7.1.0, then run:
 ./scripts/Build-Windows.ps1 -Version 0.1.0 -IsccPath 'C:/Program Files/Inno Setup 7/ISCC.exe'
 ```
 
-The build refuses to reuse its output directories. `Get-ReleaseTool.ps1 -Tool InnoSetup` downloads a pinned, checksum-verified compiler and extracts it in portable mode under `artifacts/tools`, without registering an installed application. External Actions are pinned to commit SHAs. Tool versions and hashes live in that script; `Install-WingetForCI.ps1` pins the official winget bootstrap module and client used on disposable runners.
+The build refuses to reuse its output directories. `Get-ReleaseTool.ps1 -Tool InnoSetup` downloads a pinned, checksum-verified compiler and extracts it in portable mode under `artifacts/tools`, without registering an installed application. The same script supplies pinned, checksum-verified Changie 1.26.0 for version calculation and changelog collection. External Actions are pinned to commit SHAs. Tool versions and hashes live in that script; `Install-WingetForCI.ps1` pins the official winget bootstrap module and client used on disposable runners.
 
 The installer includes NuGet licence metadata, full licence texts/notices, the runtime pack's notices, and Inter's OFL. The vendored Apache text comes from SPDX license-list-data v3.27.0; Inter's OFL comes from rsms/inter v4.1. The collector fails on new unhandled licence expressions so dependency changes receive review.

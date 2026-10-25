@@ -2,11 +2,15 @@ name: Release Windows
 on:
   workflow_dispatch:
     inputs:
-      version:
-        description: 'Version (major.minor.patch)'
+      bump:
+        description: 'Version bump from the latest Changie version'
         required: true
-        default: '0.1.0'
-        type: string
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
 permissions:
   contents: read
 concurrency:
@@ -21,6 +25,7 @@ jobs:
     runs-on: windows-2025
     outputs:
       tag: ${{ steps.metadata.outputs.tag }}
+      version: ${{ steps.metadata.outputs.version }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -30,23 +35,61 @@ jobs:
         id: metadata
         shell: pwsh
         env:
-          VERSION: ${{ inputs.version }}
+          BUMP: ${{ inputs.bump }}
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          ./scripts/Release-Version.ps1 -Version $env:VERSION
-          $tag = "v$env:VERSION"
+          $ErrorActionPreference = 'Stop'
+
+          if ($env:BUMP -cnotin @('patch', 'minor', 'major')) {
+              throw 'Unsupported version bump.'
+          }
+
+          $changie = ./scripts/Get-ReleaseTool.ps1 -Tool Changie
+          $version = & $changie next $env:BUMP
+
+          if ($LASTEXITCODE -ne 0) {
+              throw 'Cannot calculate the next Changie version.'
+          }
+
+          ./scripts/Release-Version.ps1 -Version $version
+
+          $tag = "v$version"
           $tags = gh api "repos/$env:GH_REPO/git/matching-refs/tags/$tag" | ConvertFrom-Json
-          if ($LASTEXITCODE -ne 0) { throw 'Cannot check existing tags.' }
-          if ($tags | Where-Object ref -eq "refs/tags/$tag") { throw "Tag $tag already exists. Do not replace public releases." }
+
+          if ($LASTEXITCODE -ne 0) {
+              throw 'Cannot check existing tags.'
+          }
+
+          if ($tags | Where-Object ref -eq "refs/tags/$tag") {
+              throw "Tag $tag already exists. Do not replace public releases."
+          }
+
           $pages = gh api --paginate --slurp "repos/$env:GH_REPO/releases" | ConvertFrom-Json
-          if ($LASTEXITCODE -ne 0) { throw 'Cannot check existing releases.' }
+
+          if ($LASTEXITCODE -ne 0) {
+              throw 'Cannot check existing releases.'
+          }
+
           $releases = @($pages | ForEach-Object { $_ })
-          if ($releases | Where-Object tag_name -eq $tag) { throw "Release $tag already exists, including drafts." }
-          $latest = @($releases | Where-Object { !$_.draft -and !$_.prerelease -and $_.tag_name -match '^v\d+\.\d+\.\d+$' } |
-            ForEach-Object { [version]$_.tag_name.Substring(1) } | Sort-Object -Descending)
-          if ($latest.Count -and [version]$env:VERSION -le $latest[0]) { throw 'Stable versions must increase.' }
+
+          if ($releases | Where-Object tag_name -eq $tag) {
+              throw "Release $tag already exists, including drafts."
+          }
+
+          $latest = @(
+              $releases |
+                  Where-Object { !$_.draft -and !$_.prerelease -and $_.tag_name -match '^v\d+\.\d+\.\d+$' } |
+                  ForEach-Object { [version]$_.tag_name.Substring(1) } |
+                  Sort-Object -Descending
+          )
+
+          if ($latest.Count -and [version]$version -le $latest[0]) {
+              throw 'Stable versions must increase.'
+          }
+
           "tag=$tag" >> $env:GITHUB_OUTPUT
+          "version=$version" >> $env:GITHUB_OUTPUT
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: '10.0.x'
@@ -56,7 +99,7 @@ jobs:
       - name: Build installer
         shell: pwsh
         env:
-          VERSION: ${{ inputs.version }}
+          VERSION: ${{ steps.metadata.outputs.version }}
         run: |
           $compiler = ./scripts/Get-ReleaseTool.ps1 -Tool InnoSetup
           ./scripts/Build-Windows.ps1 -Version $env:VERSION -IsccPath $compiler
@@ -65,7 +108,7 @@ jobs:
         id: installer
         with:
           name: unsigned-installer
-          path: artifacts/installers/${{ inputs.version }}/*.exe
+          path: artifacts/installers/${{ steps.metadata.outputs.version }}/*.exe
           if-no-files-found: error
 
   publish:
@@ -77,26 +120,95 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
-          persist-credentials: false
+          # This job commits only the changelog after all build-job checks have passed.
+          persist-credentials: true
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: unsigned-installer
           path: release
+      - name: Collect and commit release changelog
+        id: changelog
+        shell: pwsh
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+          SOURCE_SHA: ${{ github.sha }}
+          RELEASE_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          git fetch origin $env:RELEASE_BRANCH
+
+          if ($LASTEXITCODE -ne 0) {
+              throw 'Cannot check the release branch.'
+          }
+
+          $branchSha = git rev-parse FETCH_HEAD
+
+          if ($LASTEXITCODE -ne 0) {
+              throw 'Cannot read the release branch commit.'
+          }
+
+          if ($branchSha -cne $env:SOURCE_SHA) {
+              throw 'The release branch changed during testing. Run a new release workflow.'
+          }
+
+          $changie = ./scripts/Get-ReleaseTool.ps1 -Tool Changie
+
+          & $changie batch $env:VERSION --allow-no-changes=false
+
+          if ($LASTEXITCODE -ne 0) {
+              throw 'Cannot collect release fragments.'
+          }
+
+          & $changie merge
+
+          if ($LASTEXITCODE -ne 0) {
+              throw 'Cannot update CHANGELOG.md.'
+          }
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          git add -- CHANGELOG.md .changes
+
+          if ($LASTEXITCODE -ne 0) {
+              throw 'Cannot stage the release changelog.'
+          }
+
+          git commit -m "🔖 release: prepare v$env:VERSION"
+
+          if ($LASTEXITCODE -ne 0) {
+              throw 'Cannot commit the release changelog.'
+          }
+
+          git push origin "HEAD:refs/heads/$env:RELEASE_BRANCH"
+
+          if ($LASTEXITCODE -ne 0) {
+              throw 'Cannot push the changelog commit. Check branch rules and whether the branch advanced.'
+          }
+
+          $releaseSha = git rev-parse HEAD
+
+          if ($LASTEXITCODE -ne 0) {
+              throw 'Cannot read the release commit.'
+          }
+
+          "sha=$releaseSha" >> $env:GITHUB_OUTPUT
       - name: Verify and publish
         shell: pwsh
         env:
-          VERSION: ${{ inputs.version }}
+          VERSION: ${{ needs.build.outputs.version }}
           RELEASE_TAG: ${{ needs.build.outputs.tag }}
-          SOURCE_SHA: ${{ github.sha }}
+          SOURCE_SHA: ${{ steps.changelog.outputs.sha }}
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: ./scripts/Publish-Release.ps1
 
   winget:
-    needs: publish
+    needs: [build, publish]
     if: vars.WINGET_ENABLED == 'true'
     uses: ./.github/workflows/winget.yml
     with:
-      version: ${{ inputs.version }}
+      version: ${{ needs.build.outputs.version }}
     secrets:
       WINGET_CREATE_GITHUB_TOKEN: ${{ secrets.WINGET_CREATE_GITHUB_TOKEN }}

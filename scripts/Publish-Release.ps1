@@ -28,6 +28,13 @@ $hash = (Get-FileHash $installer -Algorithm SHA256).Hash.ToLowerInvariant()
 $description = "Windows x64, self-contained, per-user installation. Quit Thoughtfall before upgrading. Your diary is retained on uninstall."
 $description = "**Unsigned installer:** This release is not code-signed. Windows may display an unknown-publisher or SmartScreen warning, and some security policies may block installation.`n`n$description"
 
+$changes = Get-Content -LiteralPath (Join-Path (Get-Location) ".changes/$env:VERSION.md") -Raw
+
+if ([string]::IsNullOrWhiteSpace($changes)) {
+    throw 'The release changelog is empty.'
+}
+
+$description += "`n`n$($changes.Trim())"
 $description += "`n`nDownload the Windows installer below. SHA256SUMS.txt contains its SHA-256 checksum.`n`nSource commit: $env:SOURCE_SHA"
 
 [IO.File]::WriteAllText((Join-Path (Get-Location) 'release/notes.md'), $description)

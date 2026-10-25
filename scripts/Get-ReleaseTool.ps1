@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory)]
-    [ValidateSet('InnoSetup', 'WingetCreate')]
+    [ValidateSet('InnoSetup', 'WingetCreate', 'Changie')]
     [string]$Tool
 )
 
@@ -15,6 +15,10 @@ if ($Tool -eq 'InnoSetup') {
     $url = 'https://github.com/jrsoftware/issrc/releases/download/is-7_1_0/innosetup-7.1.0-x64.exe'
     $hash = '0362a383ed217d4c4239b5933866dd96d3eb2102737da92f80f6057a4b40df2f'
     $file = Join-Path $directory 'innosetup-7.1.0-x64.exe'
+} elseif ($Tool -eq 'Changie') {
+    $url = 'https://github.com/miniscruff/changie/releases/download/v1.26.0/changie_1.26.0_windows_amd64.zip'
+    $hash = '86b1e2851d78be2b52b04c8129442d4fcc8b29edd839bcc893fe66486d72ae72'
+    $file = Join-Path $directory 'changie_1.26.0_windows_amd64.zip'
 } else {
     $url = 'https://github.com/microsoft/winget-create/releases/download/v1.12.13.0/wingetcreate.exe'
     $hash = '24042bd37915805615e6cf969ac57c6439124c3fe85823327f5f3fb24bd9ffea'
@@ -27,6 +31,14 @@ if (!(Test-Path $file)) {
 
 if ((Get-FileHash $file -Algorithm SHA256).Hash -ne $hash) {
     throw "Checksum mismatch for $Tool."
+}
+
+if ($Tool -eq 'Changie') {
+    $destination = Join-Path $directory 'Changie-1.26.0'
+
+    Expand-Archive -LiteralPath $file -DestinationPath $destination -Force
+
+    return (Join-Path $destination 'changie.exe')
 }
 
 if ($Tool -eq 'WingetCreate') {
