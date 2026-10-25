@@ -52,6 +52,7 @@
             </Border>
             <TextBlock Text="to save" Classes="secondary" VerticalAlignment="Center" />
             <Button x:Name="ShortcutButton" Content="Capture shortcut…" Classes="quiet" Click="OnCaptureShortcut" IsVisible="False" />
+            <Button x:Name="AppearanceButton" Content="Appearance…" Classes="quiet" Click="OnAppearance" />
         </StackPanel>
         <Border Grid.Row="4" BorderBrush="{DynamicResource StrokeBrush}" BorderThickness="0,1,0,0" Padding="0,12,0,0">
             <Grid ColumnDefinitions="*,Auto">

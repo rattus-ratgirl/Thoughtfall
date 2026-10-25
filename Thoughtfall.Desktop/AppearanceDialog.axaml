@@ -1,0 +1,44 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="Thoughtfall.Desktop.AppearanceDialog"
+    x:ClassModifier="internal"
+    Title="Appearance"
+    Width="420"
+    SizeToContent="Height"
+    CanResize="False"
+    WindowStartupLocation="CenterOwner"
+>
+    <StackPanel Margin="28" Spacing="18">
+        <TextBlock Text="Appearance" FontSize="24" FontWeight="SemiBold" />
+        <StackPanel Spacing="6">
+            <Label Content="_Colour scheme" Target="{Binding #SchemePicker}" Padding="0" />
+            <ComboBox x:Name="SchemePicker" HorizontalAlignment="Stretch" AutomationProperties.Name="Colour scheme">
+                <ComboBoxItem Content="Forest" />
+                <ComboBoxItem Content="Hearth" />
+            </ComboBox>
+            <TextBlock Text="Colour-scheme changes take effect on the next launch." Classes="secondary" TextWrapping="Wrap" />
+            <TextBlock x:Name="SchemeStatus" Classes="secondary" TextWrapping="Wrap" />
+        </StackPanel>
+        <StackPanel Spacing="6">
+            <Label Content="_Appearance" Target="{Binding #ModePicker}" Padding="0" />
+            <ComboBox x:Name="ModePicker" HorizontalAlignment="Stretch" AutomationProperties.Name="Appearance mode">
+                <ComboBoxItem Content="System" />
+                <ComboBoxItem Content="Light" />
+                <ComboBoxItem Content="Dark" />
+            </ComboBox>
+            <TextBlock
+                Text="Applies immediately when saved. System follows your desktop's light or dark setting."
+                Classes="secondary"
+                TextWrapping="Wrap"
+            />
+        </StackPanel>
+        <Border x:Name="ErrorBanner" Classes="notice" IsVisible="False">
+            <TextBlock x:Name="ErrorText" TextWrapping="Wrap" FontSize="12" />
+        </Border>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+            <Button Content="Cancel" MinWidth="88" Classes="quiet" IsCancel="True" Click="OnCancel" />
+            <Button Content="Save" MinWidth="88" Classes="primary" Click="OnSave" />
+        </StackPanel>
+    </StackPanel>
+</Window>

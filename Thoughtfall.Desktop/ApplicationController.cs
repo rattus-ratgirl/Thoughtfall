@@ -11,7 +11,12 @@ internal sealed class ApplicationController : IDisposable
     private readonly IClassicDesktopStyleApplicationLifetime _desktop;
     private readonly DesktopInstance _instance;
     private readonly TrayMenu _tray;
-    private readonly CaptureShortcutSettings? _shortcutSettings;
+    private readonly Avalonia.Application _app;
+    private readonly DesktopSettings _settings;
+    private readonly ColourScheme _loadedScheme;
+    private AppearancePreferences _appearance;
+    private string? _appearanceError;
+    private AppearanceDialog? _appearanceDialog;
     private CaptureShortcut? _committedShortcut;
     private WindowsCaptureShortcut? _windowsShortcut;
     private CaptureShortcutDialog? _shortcutDialog;
@@ -27,33 +32,46 @@ internal sealed class ApplicationController : IDisposable
     /// <param name="store">The shared diary store.</param>
     /// <param name="desktop">The desktop lifetime to shut down.</param>
     /// <param name="instance">The activation listener to stop before exit.</param>
+    /// <param name="settings">The shared desktop settings owner.</param>
+    /// <param name="appearance">The appearance preferences loaded at startup.</param>
+    /// <param name="appearanceError">Any startup settings read error.</param>
     internal ApplicationController(
         Avalonia.Application app,
         DiaryStore store,
         IClassicDesktopStyleApplicationLifetime desktop,
-        DesktopInstance instance
+        DesktopInstance instance,
+        DesktopSettings settings,
+        AppearancePreferences appearance,
+        string? appearanceError
     )
     {
         _store = store;
         _desktop = desktop;
         _instance = instance;
+        _app = app;
+        _settings = settings;
+        _appearance = appearance;
+        _loadedScheme = appearance.ColourScheme;
+        _appearanceError = appearanceError;
         Capture = new CaptureWindow(store);
+        Capture.SetStatus(appearanceError);
         _tray = new TrayMenu(app);
         Capture.CanHide = _tray.CanHideCapture;
         Capture.ExportRequested += OnExport;
         Capture.OpenFolderRequested += OnOpenFolder;
         Capture.QuitRequested += OnQuit;
         Capture.CaptureShortcutRequested += OnCaptureShortcut;
+        Capture.AppearanceRequested += OnAppearance;
         _tray.CaptureRequested += OnCapture;
         _tray.ExportRequested += OnExport;
         _tray.OpenFolderRequested += OnOpenFolder;
         _tray.QuitRequested += OnQuit;
         _tray.CaptureShortcutRequested += OnCaptureShortcut;
+        _tray.AppearanceRequested += OnAppearance;
         desktop.ShutdownRequested += OnShutdownRequested;
         if (OperatingSystem.IsWindows())
         {
-            _shortcutSettings = new CaptureShortcutSettings(store.Folder);
-            _committedShortcut = _shortcutSettings.Load(out _shortcutError);
+            _committedShortcut = _settings.LoadShortcut(out _shortcutError);
             Capture.Opened += OnCaptureOpened;
         }
     }
@@ -66,7 +84,11 @@ internal sealed class ApplicationController : IDisposable
     {
         if (!_quitting && !_exiting && !_disposed)
         {
-            if (_shortcutDialog is not null)
+            if (_appearanceDialog is not null)
+            {
+                _appearanceDialog.Activate();
+            }
+            else if (_shortcutDialog is not null)
             {
                 _shortcutDialog.Activate();
             }
@@ -91,13 +113,14 @@ internal sealed class ApplicationController : IDisposable
 
         if (_shortcutError is not null)
         {
-            Capture.SetStatus($"{_shortcutError}\nUse Capture shortcut… to change or disable it.");
+            var message = $"{_shortcutError}\nUse Capture shortcut… to change or disable it.";
+            Capture.SetStatus(_appearanceError is null ? message : $"{_appearanceError}\n{message}");
         }
     }
 
     private async void OnCaptureShortcut(object? sender, EventArgs e)
     {
-        if (_quitting || _exiting || _disposed || _shortcutSettings is null)
+        if (_quitting || _exiting || _disposed || !OperatingSystem.IsWindows())
         {
             return;
         }
@@ -145,7 +168,7 @@ internal sealed class ApplicationController : IDisposable
             return registrationError;
         }
 
-        var settingsError = _shortcutSettings!.Save(candidate);
+        var settingsError = _settings.SaveShortcut(candidate);
         if (settingsError is not null)
         {
             // Leave the committed preference untouched and release the uncommitted candidate.
@@ -156,10 +179,52 @@ internal sealed class ApplicationController : IDisposable
         _committedShortcut = candidate;
         if (_shortcutError is not null)
         {
-            Capture.SetStatus(null);
+            Capture.SetStatus(_appearanceError);
         }
 
         _shortcutError = null;
+        return null;
+    }
+
+    private async void OnAppearance(object? sender, EventArgs e)
+    {
+        if (_quitting || _exiting || _disposed)
+            return;
+
+        if (_appearanceDialog is not null)
+        {
+            _appearanceDialog.Activate();
+            return;
+        }
+
+        if (!Capture.IsEnabled || _export?.ActiveExport is { IsCompleted: false })
+            return;
+
+        Capture.ShowCapture();
+        var dialog = new AppearanceDialog(_appearance, _loadedScheme, SaveAppearance, _appearanceError);
+        _appearanceDialog = dialog;
+        try
+        {
+            await dialog.ShowDialog(Capture);
+        }
+        finally
+        {
+            _appearanceDialog = null;
+        }
+    }
+
+    private string? SaveAppearance(AppearancePreferences preferences)
+    {
+        var error = _settings.SaveAppearance(preferences);
+        if (error is not null)
+            return error;
+
+        _appearance = preferences;
+        _app.RequestedThemeVariant = preferences.ThemeVariant;
+        if (_appearanceError is not null)
+            Capture.SetStatus(_shortcutError);
+
+        _appearanceError = null;
         return null;
     }
 
@@ -187,6 +252,7 @@ internal sealed class ApplicationController : IDisposable
     {
         _quitting = true;
         _shortcutDialog?.Close();
+        _appearanceDialog?.Close();
         Capture.SetAcceptingOperations(false);
         _export?.SetAcceptingOperations(false);
         try
@@ -317,6 +383,7 @@ internal sealed class ApplicationController : IDisposable
         try
         {
             _shortcutDialog?.Close();
+            _appearanceDialog?.Close();
             _windowsShortcut?.Dispose();
             _tray.Dispose();
         }

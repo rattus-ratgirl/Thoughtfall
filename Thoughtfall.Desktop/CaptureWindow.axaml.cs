@@ -37,6 +37,9 @@ internal partial class CaptureWindow : Window
     /// <summary>Occurs when the Windows capture shortcut dialog is requested.</summary>
     internal event EventHandler? CaptureShortcutRequested;
 
+    /// <summary>Occurs when appearance settings are requested.</summary>
+    internal event EventHandler? AppearanceRequested;
+
     /// <summary>Gets or sets a value indicating whether capture can hide instead of minimizing.</summary>
     internal bool CanHide { get; set; }
 
@@ -179,6 +182,7 @@ internal partial class CaptureWindow : Window
         Editor.IsEnabled = !_saving && _acceptingOperations;
         SaveButton.IsEnabled = !_saving && _acceptingOperations && HasDraft;
         ShortcutButton.IsEnabled = _acceptingOperations;
+        AppearanceButton.IsEnabled = _acceptingOperations;
     }
 
     private async void OnSave(object? sender, RoutedEventArgs e)
@@ -196,6 +200,8 @@ internal partial class CaptureWindow : Window
     private void OnQuit(object? sender, RoutedEventArgs e) => QuitRequested?.Invoke(this, EventArgs.Empty);
 
     private void OnCaptureShortcut(object? sender, RoutedEventArgs e) => CaptureShortcutRequested?.Invoke(this, EventArgs.Empty);
+
+    private void OnAppearance(object? sender, RoutedEventArgs e) => AppearanceRequested?.Invoke(this, EventArgs.Empty);
 
     private void OnTextChanged(object? sender, TextChangedEventArgs e)
     {

@@ -20,6 +20,7 @@ internal sealed class TrayMenu : IDisposable
         }
 
         AddItem(menu, "Export entries…", (_, _) => ExportRequested?.Invoke(this, EventArgs.Empty));
+        AddItem(menu, "Appearance…", (_, _) => AppearanceRequested?.Invoke(this, EventArgs.Empty));
         AddItem(menu, "Open data folder", (_, _) => OpenFolderRequested?.Invoke(this, EventArgs.Empty));
         menu.Add(new NativeMenuItemSeparator());
         AddItem(menu, "Quit", (_, _) => QuitRequested?.Invoke(this, EventArgs.Empty));
@@ -41,6 +42,9 @@ internal sealed class TrayMenu : IDisposable
 
     /// <summary>Occurs when the Windows capture shortcut dialog is requested.</summary>
     internal event EventHandler? CaptureShortcutRequested;
+
+    /// <summary>Occurs when appearance settings are requested.</summary>
+    internal event EventHandler? AppearanceRequested;
 
     /// <summary>Occurs when export is requested from the tray.</summary>
     internal event EventHandler? ExportRequested;

@@ -3,12 +3,12 @@ namespace Thoughtfall.Desktop;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-/// <summary>Reads and replaces the desktop shortcut preference without touching diary storage.</summary>
-internal sealed class CaptureShortcutSettings(string folder)
+/// <summary>Reads desktop preferences and replaces settings.json while preserving other settings.</summary>
+internal sealed class DesktopSettings(string folder)
 {
     private readonly string _filePath = Path.Combine(folder, "settings.json");
 
-    internal CaptureShortcut? Load(out string? error)
+    internal CaptureShortcut? LoadShortcut(out string? error)
     {
         try
         {
@@ -23,10 +23,46 @@ internal sealed class CaptureShortcutSettings(string folder)
         }
     }
 
-    internal string? Save(CaptureShortcut? shortcut)
+    internal AppearancePreferences LoadAppearance(out string? error)
     {
-        string? temporaryFile = null;
+        try
+        {
+            var document = ReadDocument();
+            var scheme = ReadString(document["colourScheme"]) == "Hearth" ? ColourScheme.Hearth : ColourScheme.Forest;
+            var appearance = ReadString(document["appearance"]) switch
+            {
+                "Light" => AppearanceMode.Light,
+                "Dark" => AppearanceMode.Dark,
+                _ => AppearanceMode.System,
+            };
+            error = null;
+            return new AppearancePreferences(scheme, appearance);
+        }
+        catch (Exception ex) when (IsSettingsError(ex))
+        {
+            error = $"Couldn't read appearance settings. Using Forest and System for now.\n{ex.Message}";
+            return new AppearancePreferences();
+        }
+    }
 
+    internal string? SaveAppearance(AppearancePreferences preferences)
+    {
+        try
+        {
+            var document = ReadDocument();
+            document["colourScheme"] = preferences.ColourScheme.ToString();
+            document["appearance"] = preferences.Appearance.ToString();
+            WriteDocument(document);
+            return null;
+        }
+        catch (Exception ex) when (IsSettingsError(ex))
+        {
+            return $"Couldn't save appearance settings. Your previous preferences are unchanged.\n{ex.Message}";
+        }
+    }
+
+    internal string? SaveShortcut(CaptureShortcut? shortcut)
+    {
         try
         {
             // Re-read before writing: unreadable or invalid settings must never be silently replaced.
@@ -43,6 +79,22 @@ internal sealed class CaptureShortcutSettings(string folder)
                     ["shift"] = shortcut.Shift,
                 };
 
+            WriteDocument(document);
+            return null;
+        }
+        catch (Exception ex) when (IsSettingsError(ex))
+        {
+            return $"Couldn't save capture shortcut settings. Your previous preference is unchanged.\n{ex.Message}";
+        }
+    }
+
+    private static string? ReadString(JsonNode? preference) => preference is JsonValue value && value.TryGetValue<string>(out var text) ? text : null;
+
+    private void WriteDocument(JsonObject document)
+    {
+        string? temporaryFile = null;
+        try
+        {
             Directory.CreateDirectory(folder);
             temporaryFile = Path.Combine(folder, $".settings-{Guid.NewGuid():N}.tmp");
 
@@ -58,12 +110,6 @@ internal sealed class CaptureShortcutSettings(string folder)
                 File.Replace(temporaryFile, _filePath, null);
             else
                 File.Move(temporaryFile, _filePath);
-
-            return null;
-        }
-        catch (Exception ex) when (IsSettingsError(ex))
-        {
-            return $"Couldn't save capture shortcut settings. Your previous preference is unchanged.\n{ex.Message}";
         }
         finally
         {
@@ -75,7 +121,7 @@ internal sealed class CaptureShortcutSettings(string folder)
                 }
                 catch (Exception ex) when (IsSettingsError(ex))
                 {
-                    ErrorReporting.Unexpected("removing temporary shortcut settings", ex);
+                    ErrorReporting.Unexpected("removing temporary settings", ex);
                 }
             }
         }

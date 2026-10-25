@@ -1,0 +1,117 @@
+<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Styles.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="PageBrush" Color="#F8F5EF" />
+                    <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFCF6" />
+                    <SolidColorBrush x:Key="SurfaceHoverBrush" Color="#F0E5D7" />
+                    <SolidColorBrush x:Key="StrokeBrush" Color="#DED5C9" />
+                    <SolidColorBrush x:Key="TextBrush" Color="#40332E" />
+                    <SolidColorBrush x:Key="MutedTextBrush" Color="#76695F" />
+                    <SolidColorBrush x:Key="AccentBrush" Color="#9B503A" />
+                    <SolidColorBrush x:Key="PrimaryBrush" Color="#9B503A" />
+                    <SolidColorBrush x:Key="PrimaryHoverBrush" Color="#8B4532" />
+                    <SolidColorBrush x:Key="PrimaryPressedBrush" Color="#783B2B" />
+                    <SolidColorBrush x:Key="PrimaryTextBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="SelectionBrush" Color="#F0E5D7" />
+                    <SolidColorBrush x:Key="NoticeBrush" Color="#FFF4E4" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="PageBrush" Color="#24211F" />
+                    <SolidColorBrush x:Key="SurfaceBrush" Color="#302923" />
+                    <SolidColorBrush x:Key="SurfaceHoverBrush" Color="#43352B" />
+                    <SolidColorBrush x:Key="StrokeBrush" Color="#484039" />
+                    <SolidColorBrush x:Key="TextBrush" Color="#E9DED0" />
+                    <SolidColorBrush x:Key="MutedTextBrush" Color="#B5A89B" />
+                    <SolidColorBrush x:Key="AccentBrush" Color="#E3A58B" />
+                    <SolidColorBrush x:Key="PrimaryBrush" Color="#E3A58B" />
+                    <SolidColorBrush x:Key="PrimaryHoverBrush" Color="#EDBBA5" />
+                    <SolidColorBrush x:Key="PrimaryPressedBrush" Color="#D2947A" />
+                    <SolidColorBrush x:Key="PrimaryTextBrush" Color="#40332E" />
+                    <SolidColorBrush x:Key="SelectionBrush" Color="#4A3F36" />
+                    <SolidColorBrush x:Key="NoticeBrush" Color="#352016" />
+
+                    <!-- Dark ink on peach fills; ChromeWhite retains its other Fluent roles. -->
+                    <SolidColorBrush x:Key="AccentButtonForeground" Color="#40332E" />
+                    <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="#40332E" />
+                    <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="#40332E" />
+                    <SolidColorBrush x:Key="CalendarViewTodayForeground" Color="#40332E" />
+
+                    <!-- Opaque selected rows keep the same legible ink through hover and press. -->
+                    <SolidColorBrush x:Key="ComboBoxItemBackgroundSelected" Color="#E3A58B" />
+                    <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPointerOver" Color="#EDBBA5" />
+                    <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPressed" Color="#D2947A" />
+                    <SolidColorBrush x:Key="ComboBoxItemForegroundSelected" Color="#40332E" />
+                    <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedPointerOver" Color="#40332E" />
+                    <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedPressed" Color="#40332E" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Styles.Resources>
+
+    <FluentTheme>
+        <FluentTheme.Palettes>
+            <ColorPaletteResources
+                x:Key="Light"
+                Accent="#ff9b503a"
+                AltHigh="White"
+                AltLow="White"
+                AltMedium="White"
+                AltMediumHigh="White"
+                AltMediumLow="White"
+                BaseHigh="#ff40332e"
+                BaseLow="#fff0e5d7"
+                BaseMedium="#ffae9b82"
+                BaseMediumHigh="#ff826a49"
+                BaseMediumLow="#ff988365"
+                ChromeAltLow="#ff826a49"
+                ChromeBlackHigh="Black"
+                ChromeBlackLow="#fff0e5d7"
+                ChromeBlackMedium="#ff826a49"
+                ChromeBlackMediumLow="#ffae9b82"
+                ChromeDisabledHigh="#fff0e5d7"
+                ChromeDisabledLow="#ffae9b82"
+                ChromeGray="#ff988365"
+                ChromeHigh="#fff0e5d7"
+                ChromeLow="#fffff4e4"
+                ChromeMedium="#fffcf1e1"
+                ChromeMediumLow="#fffff4e4"
+                ChromeWhite="White"
+                ListLow="#fffcf1e1"
+                ListMedium="#fff0e5d7"
+                RegionColor="#fff8f5ef"
+            />
+            <ColorPaletteResources
+                x:Key="Dark"
+                Accent="#ffe3a58b"
+                AltHigh="Black"
+                AltLow="Black"
+                AltMedium="Black"
+                AltMediumHigh="Black"
+                AltMediumLow="Black"
+                BaseHigh="#ffe9ded0"
+                BaseLow="#ff4a3f36"
+                BaseMedium="#ffac9e94"
+                BaseMediumHigh="#ffc5b6ab"
+                BaseMediumLow="#ff7b6f65"
+                ChromeAltLow="#ffc5b6ab"
+                ChromeBlackHigh="Black"
+                ChromeBlackLow="#ffc5b6ab"
+                ChromeBlackMedium="Black"
+                ChromeBlackMediumLow="Black"
+                ChromeDisabledHigh="#ff4a3f36"
+                ChromeDisabledLow="#ffac9e94"
+                ChromeGray="#ff94867c"
+                ChromeHigh="#ff94867c"
+                ChromeLow="#ff2e150b"
+                ChromeMedium="#ff352016"
+                ChromeMediumLow="#ff43352b"
+                ChromeWhite="White"
+                ListLow="#ff352016"
+                ListMedium="#ff4a3f36"
+                RegionColor="#ff24211f"
+            />
+        </FluentTheme.Palettes>
+    </FluentTheme>
+</Styles>
