@@ -1,0 +1,3 @@
+kind: Added
+body: Windows global capture shortcut, defaulting to Ctrl+Alt+J, with a dialog to change or disable it.
+time: 2026-10-25T00:00:00Z
