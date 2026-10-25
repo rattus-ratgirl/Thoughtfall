@@ -1,15 +1,26 @@
 param(
-    [Parameter(Mandatory)][string]$Version,
-    [Parameter(Mandatory)][string]$InstallerPath,
-    [Parameter(Mandatory)][string]$OutputDirectory
+    [Parameter(Mandatory)]
+    [string]$Version,
+
+    [Parameter(Mandatory)]
+    [string]$InstallerPath,
+
+    [Parameter(Mandatory)]
+    [string]$OutputDirectory
 )
+
 $ErrorActionPreference = 'Stop'
+
 & "$PSScriptRoot/Release-Version.ps1" -Version $Version
+
 $hash = (Get-FileHash $InstallerPath -Algorithm SHA256).Hash
 $repository = 'https://github.com/rattus-ratgirl/Thoughtfall'
 $directory = Join-Path $OutputDirectory "manifests/r/Ratgirl/Thoughtfall/$Version"
+
 New-Item $directory -ItemType Directory -Force | Out-Null
+
 $encoding = New-Object System.Text.UTF8Encoding $false
+
 $files = @{
     'Ratgirl.Thoughtfall.yaml' = @"
 # yaml-language-server: `$schema=https://aka.ms/winget-manifest.version.1.6.0.schema.json
@@ -61,5 +72,9 @@ ManifestType: installer
 ManifestVersion: 1.6.0
 "@
 }
-foreach ($name in $files.Keys) { [IO.File]::WriteAllText((Join-Path $directory $name), $files[$name] + "`n", $encoding) }
+
+foreach ($name in $files.Keys) {
+    [IO.File]::WriteAllText((Join-Path $directory $name), $files[$name] + "`n", $encoding)
+}
+
 return $directory
