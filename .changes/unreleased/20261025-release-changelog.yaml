@@ -1,3 +1,0 @@
-kind: Changed
-body: Select the release version bump in GitHub Actions and publish collected Changie notes after tests pass, committing the updated changelog and removed fragments.
-time: 2026-10-25T12:00:00Z
