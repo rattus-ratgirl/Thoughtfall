@@ -10,6 +10,7 @@ resharper_blank_lines_after_multiline_statements = 1
 resharper_blank_lines_before_multiline_statements = 1
 resharper_braces_for_ifelse = not_required_for_both
 resharper_csharp_max_line_length = 150
+resharper_csharp_wrap_before_binary_opsign = true
 resharper_parentheses_redundancy_style = remove
 resharper_place_simple_embedded_statement_on_same_line = false
 resharper_wrap_after_invocation_lpar = false

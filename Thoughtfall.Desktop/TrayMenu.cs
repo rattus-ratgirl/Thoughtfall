@@ -14,6 +14,11 @@ internal sealed class TrayMenu : IDisposable
     {
         var menu = new NativeMenu();
         AddItem(menu, "Capture a thought", (_, _) => CaptureRequested?.Invoke(this, EventArgs.Empty));
+        if (OperatingSystem.IsWindows())
+        {
+            AddItem(menu, "Capture shortcut…", (_, _) => CaptureShortcutRequested?.Invoke(this, EventArgs.Empty));
+        }
+
         AddItem(menu, "Export entries…", (_, _) => ExportRequested?.Invoke(this, EventArgs.Empty));
         AddItem(menu, "Open data folder", (_, _) => OpenFolderRequested?.Invoke(this, EventArgs.Empty));
         menu.Add(new NativeMenuItemSeparator());
@@ -33,6 +38,9 @@ internal sealed class TrayMenu : IDisposable
 
     /// <summary>Occurs when capture is requested from the tray.</summary>
     internal event EventHandler? CaptureRequested;
+
+    /// <summary>Occurs when the Windows capture shortcut dialog is requested.</summary>
+    internal event EventHandler? CaptureShortcutRequested;
 
     /// <summary>Occurs when export is requested from the tray.</summary>
     internal event EventHandler? ExportRequested;

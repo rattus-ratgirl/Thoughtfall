@@ -25,13 +25,16 @@ Open `Thoughtfall.slnx` in your IDE and select `Thoughtfall.Desktop` to debug. L
 - The editor is disabled while saving. Success clears it and hides or minimizes capture. Failure retains the draft and shows an error.
 - Closing capture or pressing **Escape** retains the draft. Windows hides capture when tray support is available; Linux and desktops without a tray minimize it instead.
 - Capture and the tray offer export, the data folder, and Quit. A second launch activates the running capture window.
+- On Windows, **Ctrl+Alt+J** opens capture from any application while Thoughtfall remains running. Choose **Capture shortcut…** in capture or the tray to record a different chord, restore the default, or **Clear** and **Save** to disable it. Global shortcuts and their controls are Windows-only.
 - Quit waits for an active save or export, including an open save picker. Complete or cancel the picker to continue. A failed operation keeps the application open. Remaining drafts offer Save, Discard, or Cancel.
 
-Drafts exist only in memory until saved. The app does not register a global shortcut or start automatically at sign-in. A desktop shortcut may run the executable with `--capture`; ordinary launches also open capture.
+Drafts exist only in memory until saved. The app does not start automatically at sign-in. A desktop shortcut may run the executable with `--capture`; ordinary launches also open capture.
 
 ## Storage
 
 The SQLite database is **`~/.thoughtfall/data.db3`**, where `~` is the user's home directory (`%USERPROFILE%` on Windows).
+
+The Windows capture shortcut preference is stored separately in `~/.thoughtfall/settings.json`.
 
 The database is created on the first save or export. Schema version 1 contains a single `entries` table:
 

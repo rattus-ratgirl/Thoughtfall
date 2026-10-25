@@ -22,6 +22,7 @@ internal partial class CaptureWindow : Window
         InitializeComponent();
         AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel);
         EntryDate.Text = DateTime.Now.ToString("ddd, d MMM");
+        ShortcutButton.IsVisible = OperatingSystem.IsWindows();
     }
 
     /// <summary>Occurs when the user requests the export window.</summary>
@@ -32,6 +33,9 @@ internal partial class CaptureWindow : Window
 
     /// <summary>Occurs when the user requests application shutdown.</summary>
     internal event EventHandler? QuitRequested;
+
+    /// <summary>Occurs when the Windows capture shortcut dialog is requested.</summary>
+    internal event EventHandler? CaptureShortcutRequested;
 
     /// <summary>Gets or sets a value indicating whether capture can hide instead of minimizing.</summary>
     internal bool CanHide { get; set; }
@@ -45,11 +49,27 @@ internal partial class CaptureWindow : Window
     /// <summary>Restores and activates capture, then focuses the editor.</summary>
     internal void ShowCapture()
     {
+        var caret = Editor.CaretIndex;
+        var selectionStart = Editor.SelectionStart;
+        var selectionEnd = Editor.SelectionEnd;
         EntryDate.Text = DateTime.Now.ToString("ddd, d MMM");
         Show();
         WindowState = WindowState.Normal;
         Activate();
-        Dispatcher.UIThread.Post(() => Editor.Focus(), DispatcherPriority.Input);
+        Dispatcher.UIThread.Post(
+            () =>
+            {
+                // Restoring focus may select text; retain the draft's insertion point and selection.
+                if (IsEnabled && IsVisible && IsActive)
+                {
+                    Editor.Focus();
+                    Editor.CaretIndex = caret;
+                    Editor.SelectionStart = selectionStart;
+                    Editor.SelectionEnd = selectionEnd;
+                }
+            },
+            DispatcherPriority.Input
+        );
     }
 
     /// <summary>Enables or blocks user editing and save requests.</summary>
@@ -158,6 +178,7 @@ internal partial class CaptureWindow : Window
     {
         Editor.IsEnabled = !_saving && _acceptingOperations;
         SaveButton.IsEnabled = !_saving && _acceptingOperations && HasDraft;
+        ShortcutButton.IsEnabled = _acceptingOperations;
     }
 
     private async void OnSave(object? sender, RoutedEventArgs e)
@@ -173,6 +194,8 @@ internal partial class CaptureWindow : Window
     private void OnOpenFolder(object? sender, RoutedEventArgs e) => OpenFolderRequested?.Invoke(this, EventArgs.Empty);
 
     private void OnQuit(object? sender, RoutedEventArgs e) => QuitRequested?.Invoke(this, EventArgs.Empty);
+
+    private void OnCaptureShortcut(object? sender, RoutedEventArgs e) => CaptureShortcutRequested?.Invoke(this, EventArgs.Empty);
 
     private void OnTextChanged(object? sender, TextChangedEventArgs e)
     {

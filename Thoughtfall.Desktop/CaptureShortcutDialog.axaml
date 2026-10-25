@@ -1,0 +1,44 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="Thoughtfall.Desktop.CaptureShortcutDialog"
+    x:ClassModifier="internal"
+    Title="Capture shortcut"
+    Width="460"
+    SizeToContent="Height"
+    CanResize="False"
+    WindowStartupLocation="CenterOwner"
+>
+    <StackPanel Margin="28" Spacing="18">
+        <StackPanel Spacing="8">
+            <TextBlock Text="Capture shortcut" FontSize="24" FontWeight="SemiBold" />
+            <TextBlock
+                Text="Focus the recorder and press Control or Alt, optionally Shift, plus a letter, top-row digit or F1–F11."
+                Classes="secondary"
+                TextWrapping="Wrap"
+            />
+        </StackPanel>
+
+        <Button x:Name="Recorder" HorizontalAlignment="Stretch" MinHeight="52" AutomationProperties.Name="Record capture shortcut" />
+
+        <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Content="Clear" Classes="quiet" Click="OnClear" />
+            <Button Content="Restore default" Classes="quiet" Click="OnRestoreDefault" />
+        </StackPanel>
+
+        <Border x:Name="ErrorBanner" Classes="notice" IsVisible="False">
+            <TextBlock x:Name="ErrorText" TextWrapping="Wrap" FontSize="12" />
+        </Border>
+
+        <TextBlock
+            Text="Changes take effect only when saved. Thoughtfall must remain running for the shortcut to work."
+            Classes="secondary"
+            TextWrapping="Wrap"
+        />
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+            <Button Content="Cancel" MinWidth="88" Classes="quiet" IsCancel="True" Click="OnCancel" />
+            <Button x:Name="SaveButton" Content="Save" MinWidth="88" Classes="primary" Click="OnSave" />
+        </StackPanel>
+    </StackPanel>
+</Window>

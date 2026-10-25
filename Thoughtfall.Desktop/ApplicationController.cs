@@ -11,6 +11,11 @@ internal sealed class ApplicationController : IDisposable
     private readonly IClassicDesktopStyleApplicationLifetime _desktop;
     private readonly DesktopInstance _instance;
     private readonly TrayMenu _tray;
+    private readonly CaptureShortcutSettings? _shortcutSettings;
+    private CaptureShortcut? _committedShortcut;
+    private WindowsCaptureShortcut? _windowsShortcut;
+    private CaptureShortcutDialog? _shortcutDialog;
+    private string? _shortcutError;
     private ExportWindow? _export;
     private Task _quitTask = Task.CompletedTask;
     private bool _quitting;
@@ -38,11 +43,19 @@ internal sealed class ApplicationController : IDisposable
         Capture.ExportRequested += OnExport;
         Capture.OpenFolderRequested += OnOpenFolder;
         Capture.QuitRequested += OnQuit;
+        Capture.CaptureShortcutRequested += OnCaptureShortcut;
         _tray.CaptureRequested += OnCapture;
         _tray.ExportRequested += OnExport;
         _tray.OpenFolderRequested += OnOpenFolder;
         _tray.QuitRequested += OnQuit;
+        _tray.CaptureShortcutRequested += OnCaptureShortcut;
         desktop.ShutdownRequested += OnShutdownRequested;
+        if (OperatingSystem.IsWindows())
+        {
+            _shortcutSettings = new CaptureShortcutSettings(store.Folder);
+            _committedShortcut = _shortcutSettings.Load(out _shortcutError);
+            Capture.Opened += OnCaptureOpened;
+        }
     }
 
     /// <summary>Gets the application's capture window.</summary>
@@ -53,8 +66,101 @@ internal sealed class ApplicationController : IDisposable
     {
         if (!_quitting && !_exiting && !_disposed)
         {
-            Capture.ShowCapture();
+            if (_shortcutDialog is not null)
+            {
+                _shortcutDialog.Activate();
+            }
+            else if (Capture.IsEnabled && _export?.ActiveExport is not { IsCompleted: false })
+            {
+                // Do not take focus from a modal dialog or an export's native save picker.
+                Capture.ShowCapture();
+            }
         }
+    }
+
+    private void OnCaptureOpened(object? sender, EventArgs e)
+    {
+        Capture.Opened -= OnCaptureOpened;
+        // Wait for the capture window to own a valid HWND. Hidden/minimized capture retains it.
+        _windowsShortcut = new WindowsCaptureShortcut(Capture, ActivateCapture);
+        var registrationError = _windowsShortcut.Register(_committedShortcut);
+        if (registrationError is not null)
+        {
+            _shortcutError = string.IsNullOrEmpty(_shortcutError) ? registrationError : $"{_shortcutError}\n{registrationError}";
+        }
+
+        if (_shortcutError is not null)
+        {
+            Capture.SetStatus($"{_shortcutError}\nUse Capture shortcut… to change or disable it.");
+        }
+    }
+
+    private async void OnCaptureShortcut(object? sender, EventArgs e)
+    {
+        if (_quitting || _exiting || _disposed || _shortcutSettings is null)
+        {
+            return;
+        }
+
+        if (_shortcutDialog is not null)
+        {
+            _shortcutDialog.Activate();
+            return;
+        }
+
+        if (!Capture.IsEnabled || _export?.ActiveExport is { IsCompleted: false })
+        {
+            return;
+        }
+
+        Capture.ShowCapture();
+        var suspensionError = _windowsShortcut!.Suspend();
+        var dialog = new CaptureShortcutDialog(_committedShortcut, SaveCaptureShortcut, suspensionError ?? _shortcutError);
+        _shortcutDialog = dialog;
+        try
+        {
+            await dialog.ShowDialog(Capture);
+        }
+        finally
+        {
+            _shortcutDialog = null;
+            if (!dialog.Saved && !_exiting && !_disposed)
+            {
+                // Cancellation abandons edits, but restoring the committed registration can still fail.
+                var restorationError = _windowsShortcut.Register(_committedShortcut);
+                if (restorationError is not null)
+                {
+                    _shortcutError = $"Couldn't restore the previous capture shortcut.\n{restorationError}";
+                    Capture.SetStatus(_shortcutError);
+                }
+            }
+        }
+    }
+
+    private string? SaveCaptureShortcut(CaptureShortcut? candidate)
+    {
+        var registrationError = _windowsShortcut!.Register(candidate);
+        if (registrationError is not null)
+        {
+            return registrationError;
+        }
+
+        var settingsError = _shortcutSettings!.Save(candidate);
+        if (settingsError is not null)
+        {
+            // Leave the committed preference untouched and release the uncommitted candidate.
+            var releaseError = _windowsShortcut.Suspend();
+            return releaseError is null ? settingsError : $"{settingsError}\n{releaseError}";
+        }
+
+        _committedShortcut = candidate;
+        if (_shortcutError is not null)
+        {
+            Capture.SetStatus(null);
+        }
+
+        _shortcutError = null;
+        return null;
     }
 
     /// <summary>Reports that shortcut activation has stopped working.</summary>
@@ -80,6 +186,7 @@ internal sealed class ApplicationController : IDisposable
     private async Task QuitCoreAsync()
     {
         _quitting = true;
+        _shortcutDialog?.Close();
         Capture.SetAcceptingOperations(false);
         _export?.SetAcceptingOperations(false);
         try
@@ -205,9 +312,12 @@ internal sealed class ApplicationController : IDisposable
         }
 
         _disposed = true;
+        Capture.Opened -= OnCaptureOpened;
         _desktop.ShutdownRequested -= OnShutdownRequested;
         try
         {
+            _shortcutDialog?.Close();
+            _windowsShortcut?.Dispose();
             _tray.Dispose();
         }
         finally

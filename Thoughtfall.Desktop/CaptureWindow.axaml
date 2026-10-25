@@ -51,6 +51,7 @@
                 <TextBlock Text="Ctrl + Enter" Classes="secondary" FontSize="11" />
             </Border>
             <TextBlock Text="to save" Classes="secondary" VerticalAlignment="Center" />
+            <Button x:Name="ShortcutButton" Content="Capture shortcut…" Classes="quiet" Click="OnCaptureShortcut" IsVisible="False" />
         </StackPanel>
         <Border Grid.Row="4" BorderBrush="{DynamicResource StrokeBrush}" BorderThickness="0,1,0,0" Padding="0,12,0,0">
             <Grid ColumnDefinitions="*,Auto">
