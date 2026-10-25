@@ -54,7 +54,7 @@ Choose an inclusive date range and either Structured JSON or Markdown, then sele
 Dates use each entry's original UTC offset. Entries are ordered by recorded local date/time, then instant, retaining insertion order for exact timestamp ties.
 
 - JSON groups entries by year, month, and day. Each entry retains `id`, `timestamp`, and `text`; timestamps use seven fractional digits and the original offset.
-- Markdown uses year/month/day headings and quoted entry text. Text line endings are normalized to LF.
+- Markdown places note text beneath year/month/day headings formatted for your regional calendar. Text line endings are normalized to LF.
 
 Exports are written to a temporary file alongside the destination, flushed, then moved into place. Failed formatting or writing leaves an existing destination intact. Export never writes into the private data folder, including through directory links.
 
@@ -75,7 +75,7 @@ dotnet build Thoughtfall.slnx -c Release -warnaserror
 dotnet test Thoughtfall.Tests -c Release --no-build --results-directory artifacts/test-results
 ```
 
-Tests cover entry invariants, exact Unicode/large-text export, inclusive recorded-offset dates, clock-change ordering, JSON structure, Markdown quotation/newlines, and caller-owned stream/writer lifetime. They call public members with in-memory values only.
+Tests cover entry invariants, exact Unicode/large-text export, inclusive recorded-offset dates, clock-change ordering, JSON structure, localized Markdown headings/newlines, and caller-owned stream/writer lifetime. They call public members with in-memory values only.
 
 There are no UI mocks, headless windows, filesystem/database tests, process launches, or environment simulations. Passing tests do **not** establish that native UI, SQLite integration, file replacement, or cross-process activation work on a particular desktop. Those areas require source review and separate user validation.
 
@@ -89,7 +89,7 @@ dotnet husky install
 dotnet csharpier format .
 ```
 
-CSharpier formats C# and XML/XAML. The pre-commit hook formats staged files. StyleCop remains enabled, with mandatory documentation, file headers, and member sorting disabled. Write comments for meaningful contracts and non-obvious decisions; keep related methods together.
+CSharpier formats C# and XML/XAML. The pre-commit hook formats staged files. Write comments for meaningful contracts and non-obvious decisions; keep related methods together.
 
 ## Portable publishing
 

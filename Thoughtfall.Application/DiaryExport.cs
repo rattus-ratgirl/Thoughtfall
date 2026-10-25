@@ -12,72 +12,113 @@ public static class DiaryExport
     public static void WriteJson(Stream output, IEnumerable<DiaryEntry> entries)
     {
         ArgumentNullException.ThrowIfNull(output);
+
         var ordered = DiaryEntries.SelectRange(entries, DateOnly.MinValue, DateOnly.MaxValue);
-        using var writer = new Utf8JsonWriter(output, new JsonWriterOptions { Indented = true });
-        writer.WriteStartObject();
-        foreach (var year in ordered.GroupBy(entry => entry.Timestamp.Year))
+
+        using (var writer = new Utf8JsonWriter(output, new JsonWriterOptions { Indented = true }))
         {
-            writer.WriteStartObject(year.Key.ToString("D4", CultureInfo.InvariantCulture));
-            foreach (var month in year.GroupBy(entry => entry.Timestamp.Month))
-            {
-                writer.WriteStartObject(month.Key.ToString("D2", CultureInfo.InvariantCulture));
-                foreach (var day in month.GroupBy(entry => entry.Timestamp.Day))
-                {
-                    writer.WriteStartArray(day.Key.ToString("D2", CultureInfo.InvariantCulture));
-                    foreach (var entry in day)
-                    {
-                        writer.WriteStartObject();
-                        writer.WriteString("id", entry.Id);
-                        writer.WriteString("timestamp", entry.Timestamp.ToString("O", CultureInfo.InvariantCulture));
-                        writer.WriteString("text", entry.Text);
-                        writer.WriteEndObject();
-                    }
+            writer.WriteStartObject();
 
-                    writer.WriteEndArray();
-                }
-
-                writer.WriteEndObject();
-            }
+            foreach (var year in ordered.GroupBy(entry => entry.Timestamp.Year))
+                WriteJsonYear(writer, year);
 
             writer.WriteEndObject();
         }
-
-        writer.WriteEndObject();
     }
 
-    /// <summary>Writes quoted text with LF newlines without closing the writer or changing its newline setting.</summary>
+    /// <summary>Writes notes beneath localized calendar headings with LF newlines, leaving the writer open and its settings unchanged.</summary>
     /// <param name="output">The destination writer.</param>
     /// <param name="entries">The entries to order and export.</param>
     public static void WriteMarkdown(TextWriter output, IEnumerable<DiaryEntry> entries)
     {
         ArgumentNullException.ThrowIfNull(output);
-        var ordered = DiaryEntries.SelectRange(entries, DateOnly.MinValue, DateOnly.MaxValue);
-        output.Write("# Thoughtfall\n\n");
-        foreach (var year in ordered.GroupBy(entry => entry.Timestamp.Year))
-        {
-            output.Write(FormattableString.Invariant($"## {year.Key:D4}\n\n"));
-            foreach (var month in year.GroupBy(entry => entry.Timestamp.Month))
-            {
-                var monthName = CultureInfo.InvariantCulture.DateTimeFormat.GetMonthName(month.Key);
-                output.Write(FormattableString.Invariant($"### {month.Key:D2} — {monthName}\n\n"));
-                foreach (var day in month.GroupBy(entry => entry.Timestamp.Day))
-                {
-                    output.Write(FormattableString.Invariant($"#### {year.Key:D4}-{month.Key:D2}-{day.Key:D2}\n\n"));
-                    foreach (var entry in day)
-                    {
-                        output.Write($"##### {entry.Timestamp.ToString("O", CultureInfo.InvariantCulture)}\n\n");
-                        output.Write($"ID: `{entry.Id}`\n\n");
-                        // Quoting keeps headings in the entry from escaping its date group.
-                        using var text = new StringReader(entry.Text);
-                        while (text.ReadLine() is { } line)
-                        {
-                            output.Write($"> {line}\n");
-                        }
 
-                        output.Write('\n');
-                    }
-                }
+        var ordered = DiaryEntries.SelectRange(entries, DateOnly.MinValue, DateOnly.MaxValue);
+        var culture = CultureInfo.CurrentCulture;
+        var calendar = culture.DateTimeFormat.Calendar;
+
+        var containsUnsupportedDate = ordered.Any(entry =>
+            entry.Timestamp.DateTime < calendar.MinSupportedDateTime || entry.Timestamp.DateTime > calendar.MaxSupportedDateTime
+        );
+
+        if (containsUnsupportedDate)
+            throw new InvalidDataException("An entry's date is outside the range supported by your regional calendar. Choose a narrower date range.");
+
+        var yearFormat = calendar.Eras.Length > 1 ? "gg yyyy" : "yyyy";
+
+        (int Era, int Year)? previousYear = null;
+
+        int? previousMonth = null;
+        DateTime? previousDay = null;
+
+        foreach (var entry in ordered)
+        {
+            var date = entry.Timestamp.DateTime;
+            var year = (calendar.GetEra(date), calendar.GetYear(date));
+            var month = calendar.GetMonth(date);
+
+            if (year != previousYear)
+            {
+                output.Write($"# {date.ToString(yearFormat, culture)}\n\n");
+                previousYear = year;
+                previousMonth = null;
             }
+
+            if (month != previousMonth)
+            {
+                output.Write($"## {date.ToString("MMMM", culture)}\n\n");
+                previousMonth = month;
+            }
+
+            if (date.Date != previousDay)
+            {
+                output.Write($"### {date.ToString("D", culture)}\n\n");
+                previousDay = date.Date;
+            }
+
+            var text = entry.Text.ReplaceLineEndings("\n");
+            output.Write(text);
+
+            if (!text.EndsWith('\n'))
+                output.Write('\n');
+
+            output.Write('\n');
         }
+    }
+
+    private static void WriteJsonYear(Utf8JsonWriter writer, IGrouping<int, DiaryEntry> year)
+    {
+        writer.WriteStartObject(year.Key.ToString("D4", CultureInfo.InvariantCulture));
+
+        foreach (var month in year.GroupBy(entry => entry.Timestamp.Month))
+            WriteJsonMonth(writer, month);
+
+        writer.WriteEndObject();
+    }
+
+    private static void WriteJsonMonth(Utf8JsonWriter writer, IGrouping<int, DiaryEntry> month)
+    {
+        writer.WriteStartObject(month.Key.ToString("D2", CultureInfo.InvariantCulture));
+
+        foreach (var day in month.GroupBy(entry => entry.Timestamp.Day))
+            WriteJsonDay(writer, day);
+
+        writer.WriteEndObject();
+    }
+
+    private static void WriteJsonDay(Utf8JsonWriter writer, IGrouping<int, DiaryEntry> day)
+    {
+        writer.WriteStartArray(day.Key.ToString("D2", CultureInfo.InvariantCulture));
+
+        foreach (var entry in day)
+        {
+            writer.WriteStartObject();
+            writer.WriteString("id", entry.Id);
+            writer.WriteString("timestamp", entry.Timestamp.ToString("O", CultureInfo.InvariantCulture));
+            writer.WriteString("text", entry.Text);
+            writer.WriteEndObject();
+        }
+
+        writer.WriteEndArray();
     }
 }

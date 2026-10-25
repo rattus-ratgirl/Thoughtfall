@@ -12,8 +12,4 @@
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <RepositoryUrl>https://github.com/rattus-ratgirl/Thoughtfall</RepositoryUrl>
     </PropertyGroup>
-    <ItemGroup>
-        <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" />
-        <PackageReference Include="StyleCop.Analyzers" PrivateAssets="all" />
-    </ItemGroup>
 </Project>
