@@ -14,13 +14,18 @@ internal static class Program
             // Inno Setup checks this marker before installing or uninstalling.
             // It never owns the mutex or closes the app, so drafts can be saved normally.
             using var installerMarker = OperatingSystem.IsWindows() ? new Mutex(false, @"Local\Thoughtfall.Running") : null;
+#if DEBUG
+            var dataFolder = AppContext.BaseDirectory;
+#else
             var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             if (string.IsNullOrWhiteSpace(home))
             {
                 throw new IOException("The user's home directory is unavailable.");
             }
 
-            var store = new DiaryStore(Path.Combine(home, ".thoughtfall"));
+            var dataFolder = Path.Combine(home, ".thoughtfall");
+#endif
+            var store = new DiaryStore(dataFolder);
             using var instance = DesktopInstance.Open(store.Folder);
             if (!instance.IsOwner)
             {

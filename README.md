@@ -33,7 +33,9 @@ Drafts exist only in memory until saved. The app does not start automatically at
 
 ## Storage
 
-The SQLite database is **`~/.thoughtfall/data.db3`**, where `~` is the user's home directory (`%USERPROFILE%` on Windows).
+Release builds store the SQLite database at **`~/.thoughtfall/data.db3`**, where `~` is the user's home directory (`%USERPROFILE%` on Windows).
+
+Debug builds use the executable directory instead, keeping `data.db3`, `settings.json`, and the instance lock separate from Release data. This includes the default `dotnet run` and IDE Debug configurations. Existing data is not moved or copied between configurations.
 
 Appearance preferences (`colourScheme` and `appearance`) and the Windows capture shortcut (`captureShortcut`) share `~/.thoughtfall/settings.json`, separately from diary data. Missing or unknown appearance preferences independently default to Forest and System. Saving either feature preserves the other settings; read and write failures are shown in the app.
 
