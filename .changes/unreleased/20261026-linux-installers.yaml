@@ -1,0 +1,3 @@
+kind: Added
+body: Publish self-contained Linux installers for x64 and ARM64 alongside the Windows installer, targeting Ubuntu 24.04/26.04 and Debian 12/13.
+time: 2026-10-26T12:00:00Z

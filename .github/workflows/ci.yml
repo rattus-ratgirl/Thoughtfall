@@ -9,6 +9,10 @@ env:
   AVALONIA_TELEMETRY_OPTOUT: '1'
   DOTNET_NOLOGO: '1'
 jobs:
+  linux:
+    uses: ./.github/workflows/linux.yml
+    with:
+      version: '0.0.0'
   build:
     runs-on: windows-2025
     steps:

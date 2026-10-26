@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Thoughtfall
+Comment=A quiet diary for thoughts as they happen
+Exec=thoughtfall --capture
+TryExec=thoughtfall
+Icon=thoughtfall
+Terminal=false
+Categories=Office;
+StartupNotify=false

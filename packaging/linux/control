@@ -1,0 +1,12 @@
+Package: thoughtfall
+Version: @VERSION@
+Section: utils
+Priority: optional
+Architecture: @ARCH@
+Maintainer: ratgirl <220043304+rattus-ratgirl@users.noreply.github.com>
+Installed-Size: @INSTALLED_SIZE@
+Depends: ca-certificates, libc6 (>= 2.36), libgcc-s1, libstdc++6, libgssapi-krb5-2, libicu72 | libicu74 | libicu76 | libicu78, libssl3 | libssl3t64, tzdata, zlib1g, libx11-6, libice6, libsm6, libfontconfig1, xdg-utils
+Homepage: https://github.com/rattus-ratgirl/Thoughtfall
+Description: A quiet diary for thoughts as they happen
+ A local desktop diary with capture and JSON or Markdown export.
+ Includes the .NET runtime. Requires an X11 desktop or XWayland.

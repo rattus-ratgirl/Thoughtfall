@@ -2,13 +2,22 @@
 
 A small local diary for Windows and Linux, built with Avalonia on .NET 10.
 
-## Windows releases
+## Install
 
-Windows installers are published through GitHub Actions to [GitHub Releases](https://github.com/rattus-ratgirl/Thoughtfall/releases).
-The installer bundles .NET, installs for the current user, and adds a Start menu shortcut.
-Quit Thoughtfall before upgrading or uninstalling; your diary is retained.
+Each [GitHub Release](https://github.com/rattus-ratgirl/Thoughtfall/releases) includes a Windows x64 installer and Linux x64/ARM64 Debian packages. All bundle .NET. Quit Thoughtfall before upgrading or uninstalling; your diary is retained.
 
-The Windows installer is unsigned; Windows may warn about an unknown publisher or block installation. The winget package `Ratgirl.Thoughtfall` becomes available after community repository acceptance.
+On Windows, download `Thoughtfall-X.Y.Z-win-x64-setup.exe`. It installs for the current user and adds a Start menu shortcut. The installer is unsigned; Windows may warn about an unknown publisher or block installation. The winget package `Ratgirl.Thoughtfall` becomes available after community repository acceptance.
+
+On Ubuntu 24.04/26.04 or Debian 12/13, choose `linux-x64.deb` for Intel/AMD computers (`dpkg --print-architecture` reports `amd64`) or `linux-arm64.deb` for ARM64 (`arm64`). Replace `X.Y.Z` with the downloaded version:
+
+```sh
+sudo apt install ./Thoughtfall-X.Y.Z-linux-x64.deb
+```
+
+Use the same command with the newer package to upgrade. Linux installs system-wide, adds **Thoughtfall** to the application menu, and provides the `thoughtfall` command. The menu entry opens capture, including when Thoughtfall is already running. A graphical desktop with X11 or XWayland is required; apt resolves system-library dependencies without a separate .NET installation. Other Debian-based distributions are best effort when dependencies match.
+
+Remove with `sudo apt remove thoughtfall`. Both removal and `sudo apt purge thoughtfall` retain `~/.thoughtfall`, including diary data and settings. Installation does not launch the app or enable autostart. Download later versions from GitHub Releases; no APT repository or automatic updater is provided. `SHA256SUMS.txt` contains checksums for all three installers.
+
 See [Publishing](docs/PUBLISHING.md) for setup and release instructions, and [Code signing policy](docs/CODE-SIGNING.md) for unsigned distribution details.
 
 ## Run
@@ -106,4 +115,4 @@ dotnet publish Thoughtfall.Desktop -c Release -r win-x64 --self-contained true -
 dotnet publish Thoughtfall.Desktop -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=false -p:PublishTrimmed=false -o artifacts/publish/linux-x64 -warnaserror
 ```
 
-Run `Thoughtfall.Desktop.exe` on Windows or `Thoughtfall.Desktop` on Linux. Linux still needs its desktop/native system dependencies; a cross-platform publish does not validate those. Windows installer builds are described in [Publishing](docs/PUBLISHING.md).
+Run `Thoughtfall.Desktop.exe` on Windows or `Thoughtfall.Desktop` on Linux. Linux still needs its desktop/native system dependencies; a cross-platform publish does not validate those. Windows and Linux installer builds are described in [Publishing](docs/PUBLISHING.md).
