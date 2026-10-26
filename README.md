@@ -21,15 +21,15 @@ dotnet run --project Thoughtfall.Desktop
 
 Open `Thoughtfall.slnx` in your IDE and select `Thoughtfall.Desktop` to debug. Linux needs a graphical desktop with Avalonia's X11/font dependencies. A tray indicator is optional.
 
-- Capture opens on launch. **Ctrl+Enter** or **Save** saves the exact text; **Enter** inserts a newline.
+- Thoughtfall starts quietly in the tray when supported. Choose **Capture a thought** to open capture. Desktops without usable tray support show capture on launch. **Ctrl+Enter** or **Save** saves the exact text; **Enter** inserts a newline.
 - The editor is disabled while saving. Success clears it and hides or minimizes capture. Failure retains the draft and shows an error.
-- Closing capture or pressing **Escape** retains the draft. Windows hides capture when tray support is available; Linux and desktops without a tray minimize it instead.
-- Capture and the tray offer export, the data folder, and Quit. A second launch activates the running capture window.
+- **Close**, closing the capture window, or pressing **Escape** retains the draft and hides capture when tray support is available. Linux and desktops without a tray minimize it instead.
+- Capture and the tray offer export and the data folder. Tray-menu **Quit** exits Thoughtfall; capture offers **Quit** when usable tray support is unavailable. A second ordinary launch leaves the running application as it is.
 - On Windows, **Ctrl+Alt+J** opens capture from any application while Thoughtfall remains running. Choose **Capture shortcut…** in capture or the tray to record a different chord, restore the default, or **Clear** and **Save** to disable it. Global shortcuts and their controls are Windows-only.
 - Choose **Appearance…** in capture or the tray on Windows or Linux. **Forest** (green) and **Hearth** (warm brown and peach) are available; scheme changes apply on the next launch, with a pending-restart reminder. **System**, **Light**, or **Dark** applies immediately after **Save** to the currently loaded scheme. System follows desktop appearance changes. **Cancel**, Escape, or closing the dialog discards edits. The default is Forest + System.
 - Quit waits for an active save or export, including an open save picker. Complete or cancel the picker to continue. A failed operation keeps the application open. Remaining drafts offer Save, Discard, or Cancel.
 
-Drafts exist only in memory until saved. The app does not start automatically at sign-in. A desktop shortcut may run the executable with `--capture`; ordinary launches also open capture.
+Drafts exist only in memory until saved. The app does not start automatically at sign-in. A desktop shortcut may run the executable with `--capture` to open capture directly, including when Thoughtfall is already running. The Start menu shortcut starts Thoughtfall quietly in the tray when supported.
 
 ## Storage
 

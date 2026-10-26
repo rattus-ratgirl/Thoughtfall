@@ -13,6 +13,7 @@ internal partial class App : Avalonia.Application
     private readonly DiaryStore? _store;
     private readonly DesktopInstance? _instance;
     private readonly DesktopSettings? _settings;
+    private readonly bool _captureRequested;
     private readonly AppearancePreferences _appearance = new();
     private readonly string? _appearanceError;
 
@@ -22,10 +23,12 @@ internal partial class App : Avalonia.Application
     /// <summary>Initializes a new instance of the <see cref="App"/> class.</summary>
     /// <param name="store">The shared diary store.</param>
     /// <param name="instance">The desktop instance owner.</param>
-    internal App(DiaryStore store, DesktopInstance instance)
+    /// <param name="captureRequested">Whether this launch explicitly requests capture.</param>
+    internal App(DiaryStore store, DesktopInstance instance, bool captureRequested)
     {
         _store = store;
         _instance = instance;
+        _captureRequested = captureRequested;
         _settings = new DesktopSettings(store.Folder);
         _appearance = _settings.LoadAppearance(out _appearanceError);
     }
@@ -53,12 +56,12 @@ internal partial class App : Avalonia.Application
         {
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             var controller = new ApplicationController(this, _store, desktop, _instance, _settings, _appearance, _appearanceError);
-            desktop.MainWindow = controller.Capture;
             _instance.Listen(
                 () => Dispatcher.UIThread.Post(controller.ActivateCapture),
                 () => Dispatcher.UIThread.Post(controller.ShowActivationError)
             );
             desktop.Exit += (_, _) => controller.Dispose();
+            controller.Start(_captureRequested);
         }
 
         base.OnFrameworkInitializationCompleted();

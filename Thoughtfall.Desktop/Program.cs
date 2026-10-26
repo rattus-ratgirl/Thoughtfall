@@ -32,14 +32,19 @@ internal static class Program
             var dataFolder = Path.Combine(home, ".thoughtfall");
 #endif
             var store = new DiaryStore(dataFolder);
+            var captureRequested = args.Contains("--capture", StringComparer.Ordinal);
             using var instance = DesktopInstance.Open(store.Folder);
             if (!instance.IsOwner)
             {
-                instance.RequestCaptureAsync().GetAwaiter().GetResult();
+                if (captureRequested)
+                {
+                    instance.RequestCaptureAsync().GetAwaiter().GetResult();
+                }
+
                 return 0;
             }
 
-            return BuildAvaloniaApp(() => new App(store, instance)).StartWithClassicDesktopLifetime(args);
+            return BuildAvaloniaApp(() => new App(store, instance, captureRequested)).StartWithClassicDesktopLifetime(args);
         }
         catch (Exception ex)
         {

@@ -59,7 +59,10 @@ internal sealed class ApplicationController : IDisposable
         Capture.CanHide = _tray.CanHideCapture;
         Capture.ExportRequested += OnExport;
         Capture.OpenFolderRequested += OnOpenFolder;
-        Capture.QuitRequested += OnQuit;
+        if (!Capture.CanHide)
+        {
+            Capture.QuitRequested += OnQuit;
+        }
         Capture.CaptureShortcutRequested += OnCaptureShortcut;
         Capture.AppearanceRequested += OnAppearance;
         _tray.CaptureRequested += OnCapture;
@@ -72,12 +75,21 @@ internal sealed class ApplicationController : IDisposable
         if (OperatingSystem.IsWindows())
         {
             _committedShortcut = _settings.LoadShortcut(out _shortcutError);
-            Capture.Opened += OnCaptureOpened;
+            RegisterCaptureShortcut();
         }
     }
 
     /// <summary>Gets the application's capture window.</summary>
     internal CaptureWindow Capture { get; }
+
+    /// <summary>Opens capture only when requested or when no usable tray is available.</summary>
+    internal void Start(bool captureRequested)
+    {
+        if (captureRequested || !Capture.CanHide)
+        {
+            ActivateCapture();
+        }
+    }
 
     /// <summary>Activates capture unless shutdown has begun.</summary>
     internal void ActivateCapture()
@@ -100,10 +112,9 @@ internal sealed class ApplicationController : IDisposable
         }
     }
 
-    private void OnCaptureOpened(object? sender, EventArgs e)
+    private void RegisterCaptureShortcut()
     {
-        Capture.Opened -= OnCaptureOpened;
-        // Wait for the capture window to own a valid HWND. Hidden/minimized capture retains it.
+        // Construction creates the native window; registration does not need to show capture.
         _windowsShortcut = new WindowsCaptureShortcut(Capture, ActivateCapture);
         var registrationError = _windowsShortcut.Register(_committedShortcut);
         if (registrationError is not null)
@@ -378,7 +389,6 @@ internal sealed class ApplicationController : IDisposable
         }
 
         _disposed = true;
-        Capture.Opened -= OnCaptureOpened;
         _desktop.ShutdownRequested -= OnShutdownRequested;
         try
         {

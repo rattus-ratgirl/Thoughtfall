@@ -44,7 +44,7 @@ WizardStyle=modern
 Source: "{#PublishDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{userprograms}\Thoughtfall"; Filename: "{app}\Thoughtfall.Desktop.exe"; Parameters: "--capture"
+Name: "{userprograms}\Thoughtfall"; Filename: "{app}\Thoughtfall.Desktop.exe"
 
 ; No Run, UninstallDelete, or diary-folder entries: installation does not launch
 ; the app, and uninstall removes only installed files, never the user's diary.

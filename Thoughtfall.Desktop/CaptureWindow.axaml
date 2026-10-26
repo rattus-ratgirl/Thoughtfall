@@ -61,7 +61,7 @@
                     <Button Classes="quiet" Click="OnOpenFolder" Content="Data folder" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                    <Button Classes="quiet" Click="OnQuit" Content="Quit" />
+                    <Button Classes="quiet" Click="OnClose" Content="Quit" x:Name="CloseButton" />
                     <Button Classes="primary" Click="OnSave" Content="Save" IsEnabled="False" MinWidth="88" x:Name="SaveButton" />
                 </StackPanel>
             </Grid>

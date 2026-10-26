@@ -13,6 +13,7 @@ internal partial class CaptureWindow : Window
     private bool _closingForExit;
     private bool _saving;
     private bool _acceptingOperations = true;
+    private bool _canHide;
 
     /// <summary>Initializes the capture UI without diary access for the XAML designer.</summary>
     public CaptureWindow()
@@ -44,7 +45,15 @@ internal partial class CaptureWindow : Window
     internal event EventHandler? AppearanceRequested;
 
     /// <summary>Gets or sets a value indicating whether capture can hide instead of minimizing.</summary>
-    internal bool CanHide { get; set; }
+    internal bool CanHide
+    {
+        get => _canHide;
+        set
+        {
+            _canHide = value;
+            CloseButton.Content = value ? "Close" : "Quit";
+        }
+    }
 
     /// <summary>Gets a value indicating whether the editor contains a nonblank draft.</summary>
     internal bool HasDraft => !string.IsNullOrWhiteSpace(Editor.Text);
@@ -200,7 +209,17 @@ internal partial class CaptureWindow : Window
 
     private void OnOpenFolder(object? sender, RoutedEventArgs e) => OpenFolderRequested?.Invoke(this, EventArgs.Empty);
 
-    private void OnQuit(object? sender, RoutedEventArgs e) => QuitRequested?.Invoke(this, EventArgs.Empty);
+    private void OnClose(object? sender, RoutedEventArgs e)
+    {
+        if (CanHide)
+        {
+            HideCapture();
+        }
+        else
+        {
+            QuitRequested?.Invoke(this, EventArgs.Empty);
+        }
+    }
 
     private void OnCaptureShortcut(object? sender, RoutedEventArgs e) => CaptureShortcutRequested?.Invoke(this, EventArgs.Empty);
 
