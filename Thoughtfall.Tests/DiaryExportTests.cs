@@ -105,6 +105,8 @@ public sealed class DiaryExportTests
     [SetCulture("en-GB")]
     public void WriteMarkdownPreservesTextAndNormalizesNewlinesWithoutChangingWriter()
     {
+        // ICU and Windows supply different punctuation for the default en-GB long date.
+        CultureInfo.CurrentCulture = new CultureInfo("en-GB", false) { DateTimeFormat = { LongDatePattern = "dddd, d MMMM yyyy" } };
         var entry = Entry("2026-10-22T12:00:00.1234567+05:30", "# My heading\r\n\r\n🐀 café\rLast\n");
 
         using var writer = new StringWriter(CultureInfo.InvariantCulture);
@@ -125,6 +127,7 @@ public sealed class DiaryExportTests
     [SetCulture("en-GB")]
     public void WriteMarkdownGroupsAndOrdersUsingRecordedLocalDates()
     {
+        CultureInfo.CurrentCulture = new CultureInfo("en-GB", false) { DateTimeFormat = { LongDatePattern = "dddd, d MMMM yyyy" } };
         var entries = new[]
         {
             Entry("2027-01-01T00:00:00.0000000+14:00", "new year"),
