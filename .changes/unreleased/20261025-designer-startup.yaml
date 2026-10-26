@@ -1,3 +1,0 @@
-kind: Fixed
-body: Allow the Avalonia designer to initialize Thoughtfall and construct its windows without starting desktop services or accessing diary data or settings.
-time: 2026-10-25T12:00:00Z

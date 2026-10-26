@@ -1,3 +1,0 @@
-kind: Fixed
-body: Start quietly in the system tray when supported, keep Thoughtfall running when capture is closed, and make the Windows capture shortcut available before capture is first opened.
-time: 2026-10-26T12:00:00Z
