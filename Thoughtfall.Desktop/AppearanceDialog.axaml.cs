@@ -12,9 +12,9 @@ internal partial class AppearanceDialog : Window
     public AppearanceDialog()
     {
         InitializeComponent();
-        SchemePicker.SelectedIndex = 0;
+        SchemePicker.SelectedIndex = 1;
         ModePicker.SelectedIndex = 0;
-        SchemeStatus.Text = "Currently using Forest.";
+        SchemeStatus.Text = "Currently using Hearth.";
     }
 
     internal AppearanceDialog(AppearancePreferences saved, ColourScheme loadedScheme, Func<AppearancePreferences, string?> save, string? error)

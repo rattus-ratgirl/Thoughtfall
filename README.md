@@ -35,7 +35,7 @@ Open `Thoughtfall.slnx` in your IDE and select `Thoughtfall.Desktop` to debug. L
 - **Close**, closing the capture window, or pressing **Escape** retains the draft and hides capture when tray support is available. Linux and desktops without a tray minimize it instead.
 - Capture and the tray offer export and the data folder. Tray-menu **Quit** exits Thoughtfall; capture offers **Quit** when usable tray support is unavailable. A second ordinary launch leaves the running application as it is.
 - On Windows, **Ctrl+Alt+J** opens capture from any application while Thoughtfall remains running. Choose **Capture shortcut…** in capture or the tray to record a different chord, restore the default, or **Clear** and **Save** to disable it. Global shortcuts and their controls are Windows-only.
-- Choose **Appearance…** in capture or the tray on Windows or Linux. **Forest** (green) and **Hearth** (warm brown and peach) are available; scheme changes apply on the next launch, with a pending-restart reminder. **System**, **Light**, or **Dark** applies immediately after **Save** to the currently loaded scheme. System follows desktop appearance changes. **Cancel**, Escape, or closing the dialog discards edits. The default is Forest + System.
+- Choose **Appearance…** in capture or the tray on Windows or Linux. **Forest** (green) and **Hearth** (warm brown and peach) are available; scheme changes apply on the next launch, with a pending-restart reminder. **System**, **Light**, or **Dark** applies immediately after **Save** to the currently loaded scheme. System follows desktop appearance changes. **Cancel**, Escape, or closing the dialog discards edits. The default is Hearth + System.
 - Quit waits for an active save or export, including an open save picker. Complete or cancel the picker to continue. A failed operation keeps the application open. Remaining drafts offer Save, Discard, or Cancel.
 
 Drafts exist only in memory until saved. The app does not start automatically at sign-in. A desktop shortcut may run the executable with `--capture` to open capture directly, including when Thoughtfall is already running. The Start menu shortcut starts Thoughtfall quietly in the tray when supported.
@@ -46,7 +46,7 @@ Release builds store the SQLite database at **`~/.thoughtfall/data.db3`**, where
 
 Debug builds use the executable directory instead, keeping `data.db3`, `settings.json`, and the instance lock separate from Release data. This includes the default `dotnet run` and IDE Debug configurations. Existing data is not moved or copied between configurations.
 
-Appearance preferences (`colourScheme` and `appearance`) and the Windows capture shortcut (`captureShortcut`) share `~/.thoughtfall/settings.json`, separately from diary data. Missing or unknown appearance preferences independently default to Forest and System. Saving either feature preserves the other settings; read and write failures are shown in the app.
+Appearance preferences (`colourScheme` and `appearance`) and the Windows capture shortcut (`captureShortcut`) share `~/.thoughtfall/settings.json`, separately from diary data. Missing or unknown appearance preferences independently default to Hearth and System. Saving either feature preserves the other settings; read and write failures are shown in the app.
 
 The database is created on the first save or export. Schema version 1 contains a single `entries` table:
 

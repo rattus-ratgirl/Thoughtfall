@@ -18,7 +18,7 @@ internal enum AppearanceMode
 }
 
 /// <summary>The saved appearance choices, independent of the currently loaded palette.</summary>
-internal sealed record AppearancePreferences(ColourScheme ColourScheme = ColourScheme.Forest, AppearanceMode Appearance = AppearanceMode.System)
+internal sealed record AppearancePreferences(ColourScheme ColourScheme = ColourScheme.Hearth, AppearanceMode Appearance = AppearanceMode.System)
 {
     internal ThemeVariant ThemeVariant =>
         Appearance switch

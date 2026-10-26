@@ -28,7 +28,7 @@ internal sealed class DesktopSettings(string folder)
         try
         {
             var document = ReadDocument();
-            var scheme = ReadString(document["colourScheme"]) == "Hearth" ? ColourScheme.Hearth : ColourScheme.Forest;
+            var scheme = ReadString(document["colourScheme"]) == "Forest" ? ColourScheme.Forest : ColourScheme.Hearth;
             var appearance = ReadString(document["appearance"]) switch
             {
                 "Light" => AppearanceMode.Light,
@@ -40,7 +40,7 @@ internal sealed class DesktopSettings(string folder)
         }
         catch (Exception ex) when (IsSettingsError(ex))
         {
-            error = $"Couldn't read appearance settings. Using Forest and System for now.\n{ex.Message}";
+            error = $"Couldn't read appearance settings. Using Hearth and System for now.\n{ex.Message}";
             return new AppearancePreferences();
         }
     }
