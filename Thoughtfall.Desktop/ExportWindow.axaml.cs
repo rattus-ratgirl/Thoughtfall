@@ -9,15 +9,13 @@ using Thoughtfall.Application;
 /// <summary>Collects export options and writes a saved-entry snapshot.</summary>
 internal partial class ExportWindow : Window
 {
-    private readonly DiaryStore _store;
+    private readonly DiaryStore? _store;
     private bool _exporting;
     private bool _acceptingOperations = true;
 
-    /// <summary>Initializes a new instance of the <see cref="ExportWindow"/> class.</summary>
-    /// <param name="store">The store providing snapshots and export writes.</param>
-    internal ExportWindow(DiaryStore store)
+    /// <summary>Initializes the export UI without diary access for the XAML designer.</summary>
+    public ExportWindow()
     {
-        _store = store;
         InitializeComponent();
         FromDate.DateValidationError += OnInvalidDate;
         ToDate.DateValidationError += OnInvalidDate;
@@ -25,6 +23,11 @@ internal partial class ExportWindow : Window
         FromDate.SelectedDate = new DateTime(today.Year, today.Month, 1);
         ToDate.SelectedDate = today;
     }
+
+    /// <summary>Initializes a new instance of the <see cref="ExportWindow"/> class.</summary>
+    /// <param name="store">The store providing snapshots and export writes.</param>
+    internal ExportWindow(DiaryStore store)
+        : this() => _store = store;
 
     /// <summary>Gets the most recent export task, including picker interaction, or null before the first export.</summary>
     internal Task<bool>? ActiveExport { get; private set; }
@@ -70,6 +73,9 @@ internal partial class ExportWindow : Window
 
     private async Task<bool> ExportAsync(DateOnly from, DateOnly to, ExportFormat format)
     {
+        if (_store is null)
+            return false;
+
         _exporting = true;
         UpdateControls();
         SetStatus("Reading entries…");

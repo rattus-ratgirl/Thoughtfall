@@ -9,21 +9,24 @@ using Thoughtfall.Application;
 /// <summary>Captures a draft and retains it until saving succeeds.</summary>
 internal partial class CaptureWindow : Window
 {
-    private readonly DiaryStore _store;
+    private readonly DiaryStore? _store;
     private bool _closingForExit;
     private bool _saving;
     private bool _acceptingOperations = true;
 
-    /// <summary>Initializes a new instance of the <see cref="CaptureWindow"/> class.</summary>
-    /// <param name="store">The store receiving saved entries.</param>
-    internal CaptureWindow(DiaryStore store)
+    /// <summary>Initializes the capture UI without diary access for the XAML designer.</summary>
+    public CaptureWindow()
     {
-        _store = store;
         InitializeComponent();
         AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel);
         EntryDate.Text = DateTime.Now.ToString("ddd, d MMM");
         ShortcutButton.IsVisible = OperatingSystem.IsWindows();
     }
+
+    /// <summary>Initializes a new instance of the <see cref="CaptureWindow"/> class.</summary>
+    /// <param name="store">The store receiving saved entries.</param>
+    internal CaptureWindow(DiaryStore store)
+        : this() => _store = store;
 
     /// <summary>Occurs when the user requests the export window.</summary>
     internal event EventHandler? ExportRequested;
@@ -98,7 +101,7 @@ internal partial class CaptureWindow : Window
 
     private async Task<bool> SaveCoreAsync()
     {
-        if (!HasDraft)
+        if (!HasDraft || _store is null)
         {
             return false;
         }
@@ -156,7 +159,7 @@ internal partial class CaptureWindow : Window
     /// <inheritdoc />
     protected override void OnClosing(WindowClosingEventArgs e)
     {
-        if (!_closingForExit)
+        if (!_closingForExit && !Design.IsDesignMode)
         {
             e.Cancel = true;
             HideCapture();

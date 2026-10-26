@@ -7,18 +7,25 @@ using Avalonia.Interactivity;
 /// <summary>Records a pending chord and keeps edits local until Save succeeds.</summary>
 internal partial class CaptureShortcutDialog : Window
 {
-    private readonly Func<CaptureShortcut?, string?> _save;
-    private CaptureShortcut? _pending;
+    private readonly Func<CaptureShortcut?, string?>? _save;
+    private CaptureShortcut? _pending = CaptureShortcut.Default;
+
+    /// <summary>Initializes shortcut controls without settings access for the XAML designer.</summary>
+    public CaptureShortcutDialog()
+    {
+        InitializeComponent();
+        Recorder.Content = _pending.DisplayText;
+        AddHandler(KeyDownEvent, OnRecorderKeyDown, RoutingStrategies.Tunnel);
+        Opened += (_, _) => Recorder.Focus();
+    }
 
     internal CaptureShortcutDialog(CaptureShortcut? committed, Func<CaptureShortcut?, string?> save, string? error)
+        : this()
     {
         _save = save;
         _pending = committed;
-        InitializeComponent();
         Recorder.Content = _pending?.DisplayText ?? "Disabled";
         SetError(error);
-        AddHandler(KeyDownEvent, OnRecorderKeyDown, RoutingStrategies.Tunnel);
-        Opened += (_, _) => Recorder.Focus();
     }
 
     internal bool Saved { get; private set; }
@@ -63,6 +70,9 @@ internal partial class CaptureShortcutDialog : Window
 
     private void OnSave(object? sender, RoutedEventArgs e)
     {
+        if (_save is null)
+            return;
+
         var error = _save(_pending);
 
         if (error is not null)

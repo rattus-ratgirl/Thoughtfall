@@ -6,12 +6,21 @@ using Avalonia.Interactivity;
 /// <summary>Keeps appearance edits local until Save succeeds.</summary>
 internal partial class AppearanceDialog : Window
 {
-    private readonly Func<AppearancePreferences, string?> _save;
+    private readonly Func<AppearancePreferences, string?>? _save;
+
+    /// <summary>Initializes appearance controls without settings access for the XAML designer.</summary>
+    public AppearanceDialog()
+    {
+        InitializeComponent();
+        SchemePicker.SelectedIndex = 0;
+        ModePicker.SelectedIndex = 0;
+        SchemeStatus.Text = "Currently using Forest.";
+    }
 
     internal AppearanceDialog(AppearancePreferences saved, ColourScheme loadedScheme, Func<AppearancePreferences, string?> save, string? error)
+        : this()
     {
         _save = save;
-        InitializeComponent();
         SchemePicker.SelectedIndex = saved.ColourScheme == ColourScheme.Hearth ? 1 : 0;
         ModePicker.SelectedIndex = saved.Appearance switch
         {
@@ -28,6 +37,9 @@ internal partial class AppearanceDialog : Window
 
     private void OnSave(object? sender, RoutedEventArgs e)
     {
+        if (_save is null)
+            return;
+
         var preferences = new AppearancePreferences(
             SchemePicker.SelectedIndex == 1 ? ColourScheme.Hearth : ColourScheme.Forest,
             ModePicker.SelectedIndex switch

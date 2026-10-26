@@ -7,7 +7,7 @@ using Avalonia.Interactivity;
 internal partial class DraftDialog : Window
 {
     /// <summary>Initializes a new instance of the <see cref="DraftDialog"/> class.</summary>
-    internal DraftDialog() => InitializeComponent();
+    public DraftDialog() => InitializeComponent();
 
     private void OnCancel(object? sender, RoutedEventArgs e) => Close(DraftDecision.Cancel);
 

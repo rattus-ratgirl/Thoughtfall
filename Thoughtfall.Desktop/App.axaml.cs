@@ -10,11 +10,14 @@ using Thoughtfall.Application;
 /// <summary>Connects the diary and instance owner to Avalonia's desktop lifetime.</summary>
 internal partial class App : Avalonia.Application
 {
-    private readonly DiaryStore _store;
-    private readonly DesktopInstance _instance;
-    private readonly DesktopSettings _settings;
-    private readonly AppearancePreferences _appearance;
+    private readonly DiaryStore? _store;
+    private readonly DesktopInstance? _instance;
+    private readonly DesktopSettings? _settings;
+    private readonly AppearancePreferences _appearance = new();
     private readonly string? _appearanceError;
+
+    /// <summary>Initializes the designer's application with default appearance and no desktop services.</summary>
+    public App() { }
 
     /// <summary>Initializes a new instance of the <see cref="App"/> class.</summary>
     /// <param name="store">The shared diary store.</param>
@@ -41,7 +44,12 @@ internal partial class App : Avalonia.Application
     /// <inheritdoc />
     public override void OnFrameworkInitializationCompleted()
     {
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        if (
+            ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
+            && _store is not null
+            && _instance is not null
+            && _settings is not null
+        )
         {
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             var controller = new ApplicationController(this, _store, desktop, _instance, _settings, _appearance, _appearanceError);

@@ -6,6 +6,12 @@ using Thoughtfall.Application;
 /// <summary>Starts the desktop application or activates its running instance.</summary>
 internal static class Program
 {
+    /// <summary>Creates the application builder used by Avalonia's designer, without desktop services.</summary>
+    internal static AppBuilder BuildAvaloniaApp() => BuildAvaloniaApp(() => new App());
+
+    private static AppBuilder BuildAvaloniaApp(Func<App> createApp) =>
+        AppBuilder.Configure(createApp).UsePlatformDetect().WithInterFont().LogToTrace();
+
     [STAThread]
     private static int Main(string[] args)
     {
@@ -33,12 +39,7 @@ internal static class Program
                 return 0;
             }
 
-            return AppBuilder
-                .Configure(() => new App(store, instance))
-                .UsePlatformDetect()
-                .WithInterFont()
-                .LogToTrace()
-                .StartWithClassicDesktopLifetime(args);
+            return BuildAvaloniaApp(() => new App(store, instance)).StartWithClassicDesktopLifetime(args);
         }
         catch (Exception ex)
         {
