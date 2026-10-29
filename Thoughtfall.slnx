@@ -1,4 +1,5 @@
 <Solution>
+    <Project Path="Thoughtfall.Cli/Thoughtfall.Cli.csproj" />
     <Project Path="Thoughtfall.Application/Thoughtfall.Application.csproj" />
     <Project Path="Thoughtfall.Desktop/Thoughtfall.Desktop.csproj" />
     <Project Path="Thoughtfall.Tests/Thoughtfall.Tests.csproj" />

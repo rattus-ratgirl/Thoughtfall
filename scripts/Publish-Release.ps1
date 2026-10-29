@@ -22,6 +22,9 @@ $names = @(
     $name
     "Thoughtfall-$env:VERSION-linux-x64.deb"
     "Thoughtfall-$env:VERSION-linux-arm64.deb"
+    "Thoughtfall-$env:VERSION-cli-win-x64.zip"
+    "Thoughtfall-$env:VERSION-cli-linux-x64.tar.gz"
+    "Thoughtfall-$env:VERSION-cli-linux-arm64.tar.gz"
 )
 
 foreach ($asset in $names) {
@@ -40,7 +43,7 @@ if ($versionInfo.ProductName.Trim() -cne 'Thoughtfall' -or $versionInfo.ProductV
 }
 
 if ($ValidateOnly) {
-    Write-Output 'All three release assets are present; Windows product metadata matches. Linux metadata was checked on the native build runners.'
+    Write-Output 'All six release assets are present; Windows product metadata matches. Linux metadata was checked on the native build runners.'
     return
 }
 
@@ -61,7 +64,8 @@ if ([string]::IsNullOrWhiteSpace($changes)) {
 }
 
 $description += "`n`n$($changes.Trim())"
-$description += "`n`nDownload the installer for your platform below. SHA256SUMS.txt contains the SHA-256 checksums of all three installers.`n`nSource commit: $env:SOURCE_SHA"
+$description += "`n`nCLI archives run independently of the desktop app. Extract the complete folder and add it to PATH. Use thoughtfall capture; configure VISUAL or EDITOR (GUI editors need a wait option). Linux desktop launch: thoughtfall-gui --capture."
+$description += "`n`nDownload the installer for your platform below. SHA256SUMS.txt contains the SHA-256 checksums of all six downloads.`n`nSource commit: $env:SOURCE_SHA"
 
 [IO.File]::WriteAllText((Join-Path (Get-Location) 'release/notes.md'), $description)
 
@@ -69,9 +73,7 @@ $arguments = @(
     'release'
     'create'
     $env:RELEASE_TAG
-    "release/$($names[0])"
-    "release/$($names[1])"
-    "release/$($names[2])"
+    @($names | ForEach-Object { "release/$_" })
     'release/SHA256SUMS.txt'
     '--repo'
     $env:GH_REPO

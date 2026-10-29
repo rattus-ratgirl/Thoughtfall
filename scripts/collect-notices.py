@@ -46,7 +46,7 @@ for identity, library in sorted(assets["libraries"].items()):
     shutil.copyfile(next(folder.glob("*.nuspec")), target / "package.nuspec")
     summary.extend([f"## {identity}", "", copyright_text, "", f"Licence: {license_value}", ""])
 
-dependencies = json.loads((publish / "Thoughtfall.Desktop.deps.json").read_text())
+dependencies = json.loads((publish / (sys.argv[3] if len(sys.argv) > 3 else "Thoughtfall.Desktop.deps.json")).read_text())
 runtime_packs = [name for name in dependencies["libraries"] if name.startswith("runtimepack.")]
 if not runtime_packs:
     raise ValueError("Expected a self-contained .NET runtime")
@@ -61,5 +61,6 @@ for identity in runtime_packs:
 
 # Inter is embedded in Avalonia.Fonts.Inter; its font licence is separate from
 # the MIT licence on the NuGet wrapper.
-shutil.copyfile(root / "packaging/licenses/Inter-OFL.txt", destination / "Inter-OFL.txt")
+if any(name.startswith("Avalonia.Fonts.Inter/") for name in assets["libraries"]):
+    shutil.copyfile(root / "packaging/licenses/Inter-OFL.txt", destination / "Inter-OFL.txt")
 (publish / "THIRD-PARTY-NOTICES.md").write_text("\n".join(summary), encoding="utf-8")

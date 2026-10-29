@@ -28,6 +28,8 @@ $sentinel = Join-Path $diaryFolder 'installer-smoke-check.txt'
 
 [IO.File]::WriteAllText($sentinel, 'Preserve user data')
 
+$originalUserPath = (Get-ItemProperty HKCU:\Environment -Name Path -ErrorAction SilentlyContinue).Path
+$cliDirectory = Join-Path $installDirectory 'cli'
 $silent = @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART')
 $marker = New-Object System.Threading.Mutex($false, 'Local\Thoughtfall.Running')
 
@@ -41,7 +43,11 @@ try {
     $marker.Dispose()
 }
 
-$installed = Start-Process $installer -ArgumentList $silent -WindowStyle Hidden -Wait -PassThru
+$optOut = Start-Process $installer -ArgumentList ($silent + '/TASKS=!clipath') -WindowStyle Hidden -Wait -PassThru
+if ($optOut.ExitCode -ne 0) { throw 'Opt-out installation failed.' }
+if ((Get-ItemProperty HKCU:\Environment -Name Path -ErrorAction SilentlyContinue).Path -cne $originalUserPath) { throw 'Opt-out changed PATH.' }
+
+$installed = Start-Process $installer -ArgumentList ($silent + '/TASKS=clipath') -WindowStyle Hidden -Wait -PassThru
 
 if ($installed.ExitCode -ne 0) {
     throw "Silent installation failed: $( $installed.ExitCode )"
@@ -55,6 +61,9 @@ if ($registration.DisplayName -ne 'Thoughtfall' -or $registration.DisplayVersion
 
 $requiredFiles = @(
     'Thoughtfall.Desktop.exe'
+    'cli/thoughtfall.exe'
+    'cli/coreclr.dll'
+    'cli/e_sqlite3.dll'
     'coreclr.dll'
     'e_sqlite3.dll'
     'LICENSE'
@@ -79,6 +88,9 @@ $reinstall = Start-Process $installer -ArgumentList $silent -WindowStyle Hidden 
 if ($reinstall.ExitCode -ne 0) {
     throw 'Reinstallation failed.'
 }
+
+$pathEntries = ((Get-ItemProperty HKCU:\Environment -Name Path).Path -split ';') | Where-Object { $_ -ieq $cliDirectory }
+if (@($pathEntries).Count -ne 1) { throw 'CLI PATH entry missing or duplicated after upgrade.' }
 
 $uninstaller = Join-Path $installDirectory 'unins000.exe'
 $marker = New-Object System.Threading.Mutex($false, 'Local\Thoughtfall.Running')
@@ -106,5 +118,7 @@ if ((Test-Path $registryPath) -or (Test-Path $shortcut) -or (Test-Path (Join-Pat
 if ([IO.File]::ReadAllText($sentinel) -cne 'Preserve user data') {
     throw 'Installation changed user data.'
 }
+
+if ((Get-ItemProperty HKCU:\Environment -Name Path -ErrorAction SilentlyContinue).Path -cne $originalUserPath) { throw 'Uninstall did not restore user PATH.' }
 
 Write-Output 'Installer smoke checks passed. GUI and cross-version upgrades still require manual validation.'

@@ -3,9 +3,9 @@ title: Thoughtfall
 description: A small, free app for catching passing thoughts without losing your place. Write a few words, save them, and carry on.
 tagline: A place for the thought you don't want to lose.
 intro: A sentence, a question, something you noticed. Open a little window, write it down, and carry on with whatever you were doing.
-downloadUrl: https://github.com/rattus-ratgirl/Thoughtfall/releases/download/v0.1.4/Thoughtfall-0.1.4-win-x64-setup.exe
-releaseUrl: https://github.com/rattus-ratgirl/Thoughtfall/releases/tag/v0.1.4
-version: 0.1.4
+downloadUrl: https://github.com/rattus-ratgirl/Thoughtfall/releases/download/v0.2.0/Thoughtfall-0.2.0-win-x64-setup.exe
+releaseUrl: https://github.com/rattus-ratgirl/Thoughtfall/releases/tag/v0.2.0
+version: 0.2.0
 ---
 
 ## Your next thought gets a blank page.
@@ -54,7 +54,7 @@ The installer isn't code-signed yet. Windows may show an unknown-publisher warni
 
 **Debian packages for x64 and ARM64** are available for **Ubuntu 24.04 and 26.04** and **Debian 12 and 13**. They include the .NET runtime. You'll need a graphical desktop with X11 or XWayland.
 
-Download the [x64 package](https://github.com/rattus-ratgirl/Thoughtfall/releases/download/v0.1.4/Thoughtfall-0.1.4-linux-x64.deb) for an Intel or AMD computer, or the [ARM64 package](https://github.com/rattus-ratgirl/Thoughtfall/releases/download/v0.1.4/Thoughtfall-0.1.4-linux-arm64.deb) for an ARM64 computer. Install the downloaded package with your package manager. Thoughtfall appears in your application menu; choosing it opens the writing window, even if the app is already running. You can also run `thoughtfall --capture`, or use that command with a shortcut configured in your desktop's settings. There's no built-in Linux global shortcut yet.
+Download the [x64 package](https://github.com/rattus-ratgirl/Thoughtfall/releases/download/v0.1.4/Thoughtfall-0.1.4-linux-x64.deb) for an Intel or AMD computer, or the [ARM64 package](https://github.com/rattus-ratgirl/Thoughtfall/releases/download/v0.1.4/Thoughtfall-0.1.4-linux-arm64.deb) for an ARM64 computer. Install the downloaded package with your package manager. Thoughtfall appears in your application menu; choosing it opens the writing window, even if the app is already running. You can also run `thoughtfall-gui --capture`, or use that command with a shortcut configured in your desktop's settings. There's no built-in Linux global shortcut yet.
 
 Linux installation is system-wide. Upgrading or removing the package keeps your saved thoughts and settings. Download updates through [GitHub Releases](https://github.com/rattus-ratgirl/Thoughtfall/releases); there's no automatic updater.
 

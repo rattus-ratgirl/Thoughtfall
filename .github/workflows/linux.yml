@@ -33,7 +33,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y shellcheck
-          shellcheck scripts/*Linux*.sh packaging/linux/thoughtfall
+          shellcheck scripts/*Linux*.sh packaging/linux/thoughtfall packaging/linux/thoughtfall-gui
       - run: dotnet build Thoughtfall.slnx -c Release -warnaserror
       - run: dotnet test Thoughtfall.Tests -c Release --no-build --results-directory artifacts/test-results
       - name: Build Debian package
@@ -49,5 +49,5 @@ jobs:
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: installer-linux-${{ matrix.arch }}
-          path: artifacts/installers/${{ inputs.version }}/*.deb
+          path: artifacts/installers/${{ inputs.version }}/*
           if-no-files-found: error

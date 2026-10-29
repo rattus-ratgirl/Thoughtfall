@@ -4,7 +4,7 @@ A small local diary for Windows and Linux, built with Avalonia on .NET 10.
 
 ## Install
 
-Each [GitHub Release](https://github.com/rattus-ratgirl/Thoughtfall/releases) includes a Windows x64 installer and Linux x64/ARM64 Debian packages. All bundle .NET. Quit Thoughtfall before upgrading or uninstalling; your diary is retained.
+Each [GitHub Release](https://github.com/rattus-ratgirl/Thoughtfall/releases) includes a Windows x64 installer and Linux x64/ARM64 Debian packages. All bundle .NET. Releases also include standalone CLI archives for the same platforms. Quit Thoughtfall before upgrading or uninstalling; your diary is retained.
 
 On Windows, download `Thoughtfall-X.Y.Z-win-x64-setup.exe`. It installs for the current user and adds a Start menu shortcut. The installer is unsigned; Windows may warn about an unknown publisher or block installation. The winget package `Ratgirl.Thoughtfall` becomes available after community repository acceptance.
 
@@ -16,9 +16,19 @@ sudo apt install ./Thoughtfall-X.Y.Z-linux-x64.deb
 
 Use the same command with the newer package to upgrade. Linux installs system-wide, adds **Thoughtfall** to the application menu, and provides the `thoughtfall` command. The menu entry opens capture, including when Thoughtfall is already running. A graphical desktop with X11 or XWayland is required; apt resolves system-library dependencies without a separate .NET installation. Other Debian-based distributions are best effort when dependencies match.
 
-Remove with `sudo apt remove thoughtfall`. Both removal and `sudo apt purge thoughtfall` retain `~/.thoughtfall`, including diary data and settings. Installation does not launch the app or enable autostart. Download later versions from GitHub Releases; no APT repository or automatic updater is provided. `SHA256SUMS.txt` contains checksums for all three installers.
+Remove with `sudo apt remove thoughtfall`. Both removal and `sudo apt purge thoughtfall` retain `~/.thoughtfall`, including diary data and settings. Installation does not launch the app or enable autostart. Download later versions from GitHub Releases; no APT repository or automatic updater is provided. `SHA256SUMS.txt` contains checksums for all six downloads.
 
 See [Publishing](docs/PUBLISHING.md) for setup and release instructions, and [Code signing policy](docs/CODE-SIGNING.md) for unsigned distribution details.
+
+## CLI capture
+
+Run `thoughtfall capture` to write using an external editor. Thoughtfall uses `VISUAL`, then `EDITOR`, falling back to Notepad on Windows or nano/vi on Linux. Save and close the editor to submit; blank text cancels. Configure GUI editors to wait, for example `EDITOR="code --wait"`. Editor commands support quoted paths and arguments, without shell expansion.
+
+Standalone CLI ZIP (Windows x64) and tar.gz (Linux x64/ARM64) archives include .NET and SQLite; extract the entire archive and add its folder to PATH. Linux still requires .NET's standard native runtime dependencies, but no graphical desktop. Desktop installers bundle the CLI; Windows offers an enabled-by-default user PATH option (open a new terminal afterward). On Linux, use `thoughtfall-gui` to launch the desktop app or `thoughtfall-gui --capture` to open capture.
+
+Release CLI and desktop builds share `~/.thoughtfall/data.db3` and can run together. Debug builds each use their own executable directory. Failed capture retains its text under the data folder's `drafts` directory and prints a recovery path. Recover that file before retrying. Drafts are removed after save or blank cancellation; they are not entries until successfully saved.
+
+For development: `dotnet run --project Thoughtfall.Cli -- capture`.
 
 ## Run
 
@@ -77,6 +87,7 @@ Exports are written to a temporary file alongside the destination, flushed, then
 
 | Project | Responsibility |
 | --- | --- |
+| `Thoughtfall.Cli` | External-editor capture and command-line entry point |
 | `Thoughtfall.Desktop` | Startup, application lifetime, code-behind windows, tray, file picker, and single-instance activation |
 | `Thoughtfall.Application` | Typed entries, SQLite storage, inclusive selection, and JSON/Markdown formatting |
 | `Thoughtfall.Tests` | Public-method unit tests using in-memory inputs and outputs |

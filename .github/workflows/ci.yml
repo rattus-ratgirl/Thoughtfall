@@ -45,5 +45,5 @@ jobs:
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: unsigned-test-installer
-          path: artifacts/installers/0.0.0/*.exe
+          path: artifacts/installers/0.0.0/*
           if-no-files-found: error

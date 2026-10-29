@@ -117,7 +117,7 @@ jobs:
         id: installer
         with:
           name: installer-windows-x64
-          path: artifacts/installers/${{ needs.prepare.outputs.version }}/*.exe
+          path: artifacts/installers/${{ needs.prepare.outputs.version }}/*
           if-no-files-found: error
 
   build-linux:
@@ -198,7 +198,7 @@ jobs:
               throw 'Cannot stage the release changelog.'
           }
 
-          git commit -m "🔖 release: prepare v$env:VERSION"
+          git commit -m "release: prepare v$env:VERSION"
 
           if ($LASTEXITCODE -ne 0) {
               throw 'Cannot commit the release changelog.'

@@ -3,8 +3,22 @@ namespace Thoughtfall.Application;
 /// <summary>
 /// Provides methods for resolving and managing directory paths.
 /// </summary>
-internal static class DataPaths
+public static class DataPaths
 {
+    /// <summary>Returns the data folder for the current build configuration.</summary>
+    /// <returns>The diary data directory.</returns>
+    public static string GetDefaultFolder()
+    {
+#if DEBUG
+        return AppContext.BaseDirectory;
+#else
+        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        if (string.IsNullOrWhiteSpace(home))
+            throw new IOException("The user's home directory is unavailable.");
+        return Path.Combine(home, ".thoughtfall");
+#endif
+    }
+
     /// <summary>
     /// Resolve directory aliases before comparing destinations or deriving instance identity.
     /// </summary>

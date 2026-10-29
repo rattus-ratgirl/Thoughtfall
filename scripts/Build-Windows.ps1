@@ -59,6 +59,16 @@ if ($LASTEXITCODE -ne 0) {
     throw 'Collecting third-party notices failed.'
 }
 
+$cli = Join-Path $publish 'cli'
+& dotnet publish "$root/Thoughtfall.Cli" -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -p:PublishTrimmed=false "-p:Version=$Version" -o $cli -warnaserror
+if ($LASTEXITCODE -ne 0) { throw 'CLI publish failed.' }
+Copy-Item "$root/LICENSE" $cli
+& python "$PSScriptRoot/collect-notices.py" "$root/Thoughtfall.Cli/obj/project.assets.json" $cli 'thoughtfall.deps.json'
+if ($LASTEXITCODE -ne 0) { throw 'CLI notices failed.' }
+New-Item $output -ItemType Directory -Force | Out-Null
+Copy-Item "$root/packaging/CLI-README.txt" $cli
+Compress-Archive -Path "$cli/*" -DestinationPath "$output/Thoughtfall-$Version-cli-win-x64.zip"
+
 & $IsccPath "/DAppVersion=$Version" "/DPublishDir=$publish" "/DOutputDir=$output" "$root/packaging/windows/Thoughtfall.iss"
 
 if ($LASTEXITCODE -ne 0) {

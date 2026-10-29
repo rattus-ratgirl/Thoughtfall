@@ -55,15 +55,16 @@ check_data() {
 
 apt-get install -y --no-install-recommends "$package"
 [[ $(dpkg-query -W -f='${Status} ${Version} ${Architecture}' thoughtfall) == "install ok installed $version $deb_arch" ]]
-for file in Thoughtfall.Desktop libcoreclr.so libe_sqlite3.so libSkiaSharp.so libHarfBuzzSharp.so LICENSE THIRD-PARTY-NOTICES.md; do
+for file in Thoughtfall.Desktop libcoreclr.so libe_sqlite3.so libSkiaSharp.so libHarfBuzzSharp.so cli/thoughtfall cli/libcoreclr.so cli/libe_sqlite3.so LICENSE THIRD-PARTY-NOTICES.md; do
     [[ -s /usr/lib/thoughtfall/$file ]]
 done
 [[ -d /usr/lib/thoughtfall/licenses ]]
 [[ -x /usr/lib/thoughtfall/Thoughtfall.Desktop && -x /usr/bin/thoughtfall ]]
+[[ -x /usr/bin/thoughtfall-gui && -x /usr/lib/thoughtfall/cli/thoughtfall ]]
 [[ -s /usr/share/doc/thoughtfall/copyright ]]
 [[ -s /usr/share/icons/hicolor/256x256/apps/thoughtfall.png ]]
 desktop-file-validate /usr/share/applications/thoughtfall.desktop
-grep -qx 'Exec=thoughtfall --capture' /usr/share/applications/thoughtfall.desktop
+grep -qx 'Exec=thoughtfall-gui --capture' /usr/share/applications/thoughtfall.desktop
 [[ -z $(find /usr/lib/thoughtfall -perm /022 -print -quit) ]]
 [[ -z $(find /usr/lib/thoughtfall \( ! -user root -o ! -group root \) -print -quit) ]]
 
@@ -80,13 +81,13 @@ while IFS= read -r -d '' file; do
         echo "Unresolved native dependencies in $file: $dependencies" >&2
         exit 1
     fi
-done < <(find /usr/lib/thoughtfall -type f \( -name '*.so' -o -name Thoughtfall.Desktop \) -print0)
+done < <(find /usr/lib/thoughtfall -type f \( -name '*.so' -o -name Thoughtfall.Desktop -o -name thoughtfall \) -print0)
 check_data
 
 apt-get install -y --reinstall --no-install-recommends "$package"
 check_data
 apt-get remove -y thoughtfall
-for file in /usr/lib/thoughtfall /usr/bin/thoughtfall /usr/share/applications/thoughtfall.desktop \
+for file in /usr/lib/thoughtfall /usr/bin/thoughtfall /usr/bin/thoughtfall-gui /usr/share/applications/thoughtfall.desktop \
     /usr/share/icons/hicolor/256x256/apps/thoughtfall.png /usr/share/doc/thoughtfall; do
     [[ ! -e $file ]]
 done

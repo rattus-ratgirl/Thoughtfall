@@ -52,16 +52,25 @@ dotnet publish "$root/Thoughtfall.Desktop" -c Release -r "linux-$arch" --self-co
 cp "$root/LICENSE" "$publish/"
 python3 "$root/scripts/collect-notices.py" "$root/Thoughtfall.Desktop/obj/project.assets.json" "$publish"
 
+cli="$publish/cli"
+dotnet publish "$root/Thoughtfall.Cli" -c Release -r "linux-$arch" --self-contained true \
+    -p:PublishSingleFile=false -p:PublishTrimmed=false "-p:Version=$version" -o "$cli" -warnaserror
+cp "$root/LICENSE" "$root/packaging/CLI-README.txt" "$cli/"
+python3 "$root/scripts/collect-notices.py" "$root/Thoughtfall.Cli/obj/project.assets.json" "$cli" thoughtfall.deps.json
+mkdir -p "$(dirname -- "$output")"
+tar -czf "$(dirname -- "$output")/Thoughtfall-$version-cli-linux-$arch.tar.gz" -C "$cli" .
+
 mkdir -p "$stage/DEBIAN" "$stage/usr/lib/thoughtfall" "$stage/usr/bin" \
     "$stage/usr/share/applications" "$stage/usr/share/icons/hicolor/256x256/apps" \
     "$stage/usr/share/doc/thoughtfall" "$(dirname -- "$output")"
 cp -a "$publish/." "$stage/usr/lib/thoughtfall/"
+install -m 755 "$root/packaging/linux/thoughtfall-gui" "$stage/usr/bin/thoughtfall-gui"
 install -m 755 "$root/packaging/linux/thoughtfall" "$stage/usr/bin/thoughtfall"
 install -m 644 "$root/packaging/linux/thoughtfall.desktop" "$stage/usr/share/applications/thoughtfall.desktop"
 install -m 644 "$root/packaging/linux/thoughtfall.png" "$stage/usr/share/icons/hicolor/256x256/apps/thoughtfall.png"
 install -m 644 "$root/LICENSE" "$stage/usr/share/doc/thoughtfall/copyright"
 chmod -R u+rwX,go+rX,go-w "$stage"
-chmod 755 "$stage/usr/lib/thoughtfall/Thoughtfall.Desktop"
+chmod 755 "$stage/usr/lib/thoughtfall/Thoughtfall.Desktop" "$stage/usr/lib/thoughtfall/cli/thoughtfall"
 
 installed_size=$(du -sk "$stage/usr" | cut -f1)
 sed -e "s/@VERSION@/$version/g" -e "s/@ARCH@/$deb_arch/g" -e "s/@INSTALLED_SIZE@/$installed_size/g" \

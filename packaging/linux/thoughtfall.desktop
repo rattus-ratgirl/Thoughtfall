@@ -2,8 +2,8 @@
 Type=Application
 Name=Thoughtfall
 Comment=A quiet diary for thoughts as they happen
-Exec=thoughtfall --capture
-TryExec=thoughtfall
+Exec=thoughtfall-gui --capture
+TryExec=thoughtfall-gui
 Icon=thoughtfall
 Terminal=false
 Categories=Office;
