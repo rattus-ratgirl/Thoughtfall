@@ -51,7 +51,7 @@ Name: "{userprograms}\Thoughtfall"; Filename: "{app}\Thoughtfall.Desktop.exe"
 ; the app, and uninstall removes only installed files, never the user's diary.
 
 [Tasks]
-Name: "clipath"; Description: "Add Thoughtfall CLI to your user PATH"; Flags: checkedonce
+Name: "clipath"; Description: "Add Thoughtfall CLI to your user PATH"
 
 [Code]
 const

@@ -47,6 +47,10 @@ $optOut = Start-Process $installer -ArgumentList ($silent + '/TASKS=!clipath') -
 if ($optOut.ExitCode -ne 0) { throw 'Opt-out installation failed.' }
 if ((Get-ItemProperty HKCU:\Environment -Name Path -ErrorAction SilentlyContinue).Path -cne $originalUserPath) { throw 'Opt-out changed PATH.' }
 
+$optOutReinstall = Start-Process $installer -ArgumentList $silent -WindowStyle Hidden -Wait -PassThru
+if ($optOutReinstall.ExitCode -ne 0) { throw 'Opt-out reinstallation failed.' }
+if ((Get-ItemProperty HKCU:\Environment -Name Path -ErrorAction SilentlyContinue).Path -cne $originalUserPath) { throw 'Reinstallation forgot the PATH opt-out.' }
+
 $installed = Start-Process $installer -ArgumentList ($silent + '/TASKS=clipath') -WindowStyle Hidden -Wait -PassThru
 
 if ($installed.ExitCode -ne 0) {
