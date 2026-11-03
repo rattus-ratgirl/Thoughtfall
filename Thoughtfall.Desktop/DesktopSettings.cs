@@ -29,18 +29,22 @@ internal sealed class DesktopSettings(string folder)
         {
             var document = ReadDocument();
             var scheme = ReadString(document["colourScheme"]) == "Forest" ? ColourScheme.Forest : ColourScheme.Hearth;
-            var appearance = ReadString(document["appearance"]) switch
-            {
-                "Light" => AppearanceMode.Light,
-                "Dark" => AppearanceMode.Dark,
-                _ => AppearanceMode.System,
-            };
+            var paletteId = document.TryGetPropertyValue("palette", out var palette)
+                ? ReadString(palette)
+                : ReadString(document["appearance"]) switch
+                {
+                    "Light" => "light",
+                    "Dark" => "dark",
+                    _ => null,
+                };
+            if (!ColourThemes.Get(scheme).HasPalette(paletteId))
+                paletteId = null;
             error = null;
-            return new AppearancePreferences(scheme, appearance);
+            return new AppearancePreferences(scheme, paletteId);
         }
         catch (Exception ex) when (IsSettingsError(ex))
         {
-            error = $"Couldn't read appearance settings. Using Hearth and System for now.\n{ex.Message}";
+            error = $"Couldn't read appearance settings. Using Hearth and Match System for now.\n{ex.Message}";
             return new AppearancePreferences();
         }
     }
@@ -51,7 +55,8 @@ internal sealed class DesktopSettings(string folder)
         {
             var document = ReadDocument();
             document["colourScheme"] = preferences.ColourScheme.ToString();
-            document["appearance"] = preferences.Appearance.ToString();
+            document["palette"] = preferences.PaletteId;
+            document.Remove("appearance");
             WriteDocument(document);
             return null;
         }

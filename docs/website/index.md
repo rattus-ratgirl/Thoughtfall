@@ -36,7 +36,7 @@ When you want to read through what you've collected, choose **Export entries…*
 
 ## Make it comfortable.
 
-Thoughtfall starts with **Hearth**, the warm brown and peach colours of this website, and follows your computer's light or dark setting. Choose **Appearance…** to switch to **Forest**, a quiet green, or set either palette to always use light or dark. Light and dark changes apply when you save; changing between Forest and Hearth takes effect next time you start Thoughtfall.
+Thoughtfall starts with **Hearth**, the warm brown and peach colours of this website, and follows your computer's light or dark setting. Choose **Appearance…** to switch to **Forest**, a quiet green, and select a palette or **Match System**. Both colour scheme and palette changes apply when you save.
 
 ## Your writing stays on your computer.
 

@@ -12,4 +12,7 @@
         <PackageReference Include="Avalonia.Fonts.Inter" />
         <AvaloniaResource Include="Assets/Thoughtfall.ico" />
     </ItemGroup>
+    <ItemGroup>
+        <InternalsVisibleTo Include="Thoughtfall.Tests" />
+    </ItemGroup>
 </Project>

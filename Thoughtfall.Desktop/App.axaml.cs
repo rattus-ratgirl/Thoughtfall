@@ -3,7 +3,8 @@ namespace Thoughtfall.Desktop;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Avalonia.Markup.Xaml.Styling;
+using Avalonia.Platform;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Thoughtfall.Application;
 
@@ -14,8 +15,9 @@ internal partial class App : Avalonia.Application
     private readonly DesktopInstance? _instance;
     private readonly DesktopSettings? _settings;
     private readonly bool _captureRequested;
-    private readonly AppearancePreferences _appearance = new();
     private readonly string? _appearanceError;
+    private AppearancePreferences _appearance = new();
+    private PlatformThemeVariant _systemAppearance = PlatformThemeVariant.Light;
 
     /// <summary>Initializes the designer's application with default appearance and no desktop services.</summary>
     public App() { }
@@ -37,16 +39,33 @@ internal partial class App : Avalonia.Application
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
-        var palette = _appearance.ColourScheme == ColourScheme.Hearth ? "Hearth" : "Thoughtfall";
-        var baseUri = new Uri("avares://Thoughtfall.Desktop/");
-        // Fluent's non-accent palette properties are read at startup. Never replace this at runtime.
-        Styles.Insert(0, new StyleInclude(baseUri) { Source = new Uri(baseUri, $"Themes/Palettes/{palette}.axaml") });
-        RequestedThemeVariant = _appearance.ThemeVariant;
+        var paletteStyles = new Styles();
+        foreach (var theme in ColourThemes.All)
+        {
+            foreach (var palette in theme.Palettes)
+            {
+                var resources = (PaletteResources)AvaloniaXamlLoader.Load(palette.Source);
+                resources.Initialise(palette.BaseVariant);
+                paletteStyles.Resources.ThemeDictionaries.Add(theme.GetVariant(palette.Id), resources);
+            }
+        }
+
+        // Shared application styles retain precedence over Fluent's invariant resources.
+        Styles.Insert(1, paletteStyles);
+        ApplyAppearance(_appearance);
     }
 
     /// <inheritdoc />
     public override void OnFrameworkInitializationCompleted()
     {
+        if (PlatformSettings is { } platformSettings)
+        {
+            UpdateSystemAppearance(platformSettings.GetColorValues().ThemeVariant);
+            platformSettings.ColorValuesChanged += OnSystemColoursChanged;
+            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime lifetime)
+                lifetime.Exit += (_, _) => platformSettings.ColorValuesChanged -= OnSystemColoursChanged;
+        }
+
         if (
             ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
             && _store is not null
@@ -66,4 +85,19 @@ internal partial class App : Avalonia.Application
 
         base.OnFrameworkInitializationCompleted();
     }
+
+    internal void ApplyAppearance(AppearancePreferences preferences)
+    {
+        _appearance = preferences;
+        RequestedThemeVariant = ColourThemes.Get(preferences.ColourScheme).ResolveVariant(preferences.PaletteId, _systemAppearance);
+    }
+
+    internal void UpdateSystemAppearance(PlatformThemeVariant appearance)
+    {
+        _systemAppearance = appearance;
+        ApplyAppearance(_appearance);
+    }
+
+    private void OnSystemColoursChanged(object? sender, PlatformColorValues values) =>
+        Dispatcher.UIThread.Post(() => UpdateSystemAppearance(values.ThemeVariant));
 }

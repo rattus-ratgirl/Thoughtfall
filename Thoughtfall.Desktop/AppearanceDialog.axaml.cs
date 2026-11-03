@@ -12,43 +12,27 @@ internal partial class AppearanceDialog : Window
     public AppearanceDialog()
     {
         InitializeComponent();
-        SchemePicker.SelectedIndex = 1;
-        ModePicker.SelectedIndex = 0;
-        SchemeStatus.Text = "Currently using Hearth.";
+        SchemePicker.ItemsSource = ColourThemes.All;
+        SchemePicker.SelectedItem = ColourThemes.Get(ColourScheme.Hearth);
+        SetPalettes(null);
+        SchemePicker.SelectionChanged += (_, _) => SetPalettes(null);
     }
 
-    internal AppearanceDialog(AppearancePreferences saved, ColourScheme loadedScheme, Func<AppearancePreferences, string?> save, string? error)
+    internal AppearanceDialog(AppearancePreferences saved, Func<AppearancePreferences, string?> save, string? error)
         : this()
     {
         _save = save;
-        SchemePicker.SelectedIndex = saved.ColourScheme == ColourScheme.Hearth ? 1 : 0;
-        ModePicker.SelectedIndex = saved.Appearance switch
-        {
-            AppearanceMode.Light => 1,
-            AppearanceMode.Dark => 2,
-            _ => 0,
-        };
-        SchemeStatus.Text =
-            saved.ColourScheme == loadedScheme
-                ? $"Currently using {loadedScheme}."
-                : $"Restart pending: {saved.ColourScheme} is saved. Currently using {loadedScheme} until the next launch.";
+        SchemePicker.SelectedItem = ColourThemes.Get(saved.ColourScheme);
+        SetPalettes(saved.PaletteId);
         SetError(error);
     }
 
     private void OnSave(object? sender, RoutedEventArgs e)
     {
-        if (_save is null)
+        if (_save is null || SchemePicker.SelectedItem is not ColourTheme theme || ModePicker.SelectedItem is not PaletteChoice palette)
             return;
 
-        var preferences = new AppearancePreferences(
-            SchemePicker.SelectedIndex == 1 ? ColourScheme.Hearth : ColourScheme.Forest,
-            ModePicker.SelectedIndex switch
-            {
-                1 => AppearanceMode.Light,
-                2 => AppearanceMode.Dark,
-                _ => AppearanceMode.System,
-            }
-        );
+        var preferences = new AppearancePreferences(theme.Id, palette.Id);
         var error = _save(preferences);
         if (error is not null)
         {
@@ -61,9 +45,24 @@ internal partial class AppearanceDialog : Window
 
     private void OnCancel(object? sender, RoutedEventArgs e) => Close();
 
+    private void SetPalettes(string? selectedId)
+    {
+        if (SchemePicker.SelectedItem is not ColourTheme theme)
+            return;
+
+        PaletteChoice[] choices = [new(null, "Match System"), .. theme.Palettes.Select(palette => new PaletteChoice(palette.Id, palette.Name))];
+        ModePicker.ItemsSource = choices;
+        ModePicker.SelectedItem = choices.FirstOrDefault(choice => choice.Id == selectedId) ?? choices[0];
+    }
+
     private void SetError(string? error)
     {
         ErrorText.Text = error;
         ErrorBanner.IsVisible = !string.IsNullOrEmpty(error);
+    }
+
+    private sealed record PaletteChoice(string? Id, string Name)
+    {
+        public override string ToString() => Name;
     }
 }

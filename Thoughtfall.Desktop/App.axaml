@@ -6,7 +6,8 @@
     RequestedThemeVariant="Default"
 >
     <Application.Styles>
-        <!-- App.Initialize inserts the saved palette before these shared styles, once at startup. -->
+        <FluentTheme />
+        <!-- App.Initialize inserts the named palettes here, before shared styles. -->
         <StyleInclude Source="/Themes/Thoughtfall.axaml" />
     </Application.Styles>
 </Application>

@@ -11,9 +11,8 @@ internal sealed class ApplicationController : IDisposable
     private readonly IClassicDesktopStyleApplicationLifetime _desktop;
     private readonly DesktopInstance _instance;
     private readonly TrayMenu _tray;
-    private readonly Avalonia.Application _app;
+    private readonly App _app;
     private readonly DesktopSettings _settings;
-    private readonly ColourScheme _loadedScheme;
     private AppearancePreferences _appearance;
     private string? _appearanceError;
     private AppearanceDialog? _appearanceDialog;
@@ -36,7 +35,7 @@ internal sealed class ApplicationController : IDisposable
     /// <param name="appearance">The appearance preferences loaded at startup.</param>
     /// <param name="appearanceError">Any startup settings read error.</param>
     internal ApplicationController(
-        Avalonia.Application app,
+        App app,
         DiaryStore store,
         IClassicDesktopStyleApplicationLifetime desktop,
         DesktopInstance instance,
@@ -51,7 +50,6 @@ internal sealed class ApplicationController : IDisposable
         _app = app;
         _settings = settings;
         _appearance = appearance;
-        _loadedScheme = appearance.ColourScheme;
         _appearanceError = appearanceError;
         Capture = new CaptureWindow(store);
         Capture.SetStatus(appearanceError);
@@ -212,7 +210,7 @@ internal sealed class ApplicationController : IDisposable
             return;
 
         Capture.ShowCapture();
-        var dialog = new AppearanceDialog(_appearance, _loadedScheme, SaveAppearance, _appearanceError);
+        var dialog = new AppearanceDialog(_appearance, SaveAppearance, _appearanceError);
         _appearanceDialog = dialog;
         try
         {
@@ -231,7 +229,7 @@ internal sealed class ApplicationController : IDisposable
             return error;
 
         _appearance = preferences;
-        _app.RequestedThemeVariant = preferences.ThemeVariant;
+        _app.ApplyAppearance(preferences);
         if (_appearanceError is not null)
             Capture.SetStatus(_shortcutError);
 

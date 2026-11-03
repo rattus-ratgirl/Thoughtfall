@@ -6,6 +6,8 @@
     <ItemGroup>
         <ProjectReference Include="../Thoughtfall.Cli/Thoughtfall.Cli.csproj" />
         <ProjectReference Include="../Thoughtfall.Application/Thoughtfall.Application.csproj" />
+        <ProjectReference Include="../Thoughtfall.Desktop/Thoughtfall.Desktop.csproj" />
+        <PackageReference Include="Avalonia.Headless" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" />
         <PackageReference Include="NUnit" />
         <PackageReference Include="NUnit3TestAdapter" PrivateAssets="all" />

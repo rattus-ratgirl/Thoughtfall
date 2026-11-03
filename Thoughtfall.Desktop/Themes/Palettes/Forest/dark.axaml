@@ -1,0 +1,50 @@
+<local:PaletteResources
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:Thoughtfall.Desktop"
+>
+    <local:PaletteResources.FluentColours>
+        <ColorPaletteResources
+            Accent="#E7B88A"
+            RegionColor="#174B3F"
+            AltHigh="#206454"
+            AltMedium="#CC206454"
+            AltMediumHigh="#E6206454"
+            AltMediumLow="#99206454"
+            AltLow="#66206454"
+            BaseHigh="#F5F2EA"
+            BaseMediumHigh="#DCE4D8"
+            BaseMedium="#C2D5C9"
+            BaseMediumLow="#91B6A3"
+            BaseLow="#3D7E6D"
+            ChromeHigh="#7EA591"
+            ChromeMedium="#3D7E6D"
+            ChromeMediumLow="#2B7462"
+            ChromeLow="#1A5547"
+            ChromeAltLow="#206454"
+            ChromeWhite="#206454"
+            ChromeBlackHigh="#102F28"
+            ChromeBlackMedium="#80206454"
+            ChromeBlackMediumLow="#66102F28"
+            ChromeBlackLow="#33102F28"
+            ChromeDisabledHigh="#245646"
+            ChromeDisabledLow="#91B6A3"
+            ListLow="#2B7462"
+            ListMedium="#397E69"
+            ErrorText="#F2C1A3"
+        />
+    </local:PaletteResources.FluentColours>
+    <SolidColorBrush x:Key="PageBrush" Color="#174B3F" />
+    <SolidColorBrush x:Key="SurfaceBrush" Color="#206454" />
+    <SolidColorBrush x:Key="SurfaceHoverBrush" Color="#2B7462" />
+    <SolidColorBrush x:Key="StrokeBrush" Color="#3D7E6D" />
+    <SolidColorBrush x:Key="TextBrush" Color="#F5F2EA" />
+    <SolidColorBrush x:Key="MutedTextBrush" Color="#C2D5C9" />
+    <SolidColorBrush x:Key="AccentBrush" Color="#E7B88A" />
+    <SolidColorBrush x:Key="PrimaryBrush" Color="#E7B88A" />
+    <SolidColorBrush x:Key="PrimaryHoverBrush" Color="#F1CAA4" />
+    <SolidColorBrush x:Key="PrimaryPressedBrush" Color="#D8A576" />
+    <SolidColorBrush x:Key="PrimaryTextBrush" Color="#173F35" />
+    <SolidColorBrush x:Key="SelectionBrush" Color="#426F5C" />
+    <SolidColorBrush x:Key="NoticeBrush" Color="#294F41" />
+</local:PaletteResources>
