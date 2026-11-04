@@ -26,7 +26,7 @@ internal sealed class ApplicationController : IDisposable
     private bool _exiting;
     private bool _disposed;
 
-    /// <summary>Initializes a new instance of the <see cref="ApplicationController"/> class.</summary>
+    /// <summary>Initialises a new instance of the <see cref="ApplicationController"/> class.</summary>
     /// <param name="app">The application hosting the tray.</param>
     /// <param name="store">The shared diary store.</param>
     /// <param name="desktop">The desktop lifetime to shut down.</param>
@@ -57,10 +57,10 @@ internal sealed class ApplicationController : IDisposable
         Capture.CanHide = _tray.CanHideCapture;
         Capture.ExportRequested += OnExport;
         Capture.OpenFolderRequested += OnOpenFolder;
+
         if (!Capture.CanHide)
-        {
             Capture.QuitRequested += OnQuit;
-        }
+
         Capture.CaptureShortcutRequested += OnCaptureShortcut;
         Capture.AppearanceRequested += OnAppearance;
         _tray.CaptureRequested += OnCapture;
@@ -70,44 +70,36 @@ internal sealed class ApplicationController : IDisposable
         _tray.CaptureShortcutRequested += OnCaptureShortcut;
         _tray.AppearanceRequested += OnAppearance;
         desktop.ShutdownRequested += OnShutdownRequested;
-        if (OperatingSystem.IsWindows())
-        {
-            _committedShortcut = _settings.LoadShortcut(out _shortcutError);
-            RegisterCaptureShortcut();
-        }
+
+        if (!OperatingSystem.IsWindows())
+            return;
+
+        _committedShortcut = _settings.LoadShortcut(out _shortcutError);
+        RegisterCaptureShortcut();
     }
 
     /// <summary>Gets the application's capture window.</summary>
-    internal CaptureWindow Capture { get; }
+    private CaptureWindow Capture { get; }
 
     /// <summary>Opens capture only when requested or when no usable tray is available.</summary>
     internal void Start(bool captureRequested)
     {
         if (captureRequested || !Capture.CanHide)
-        {
             ActivateCapture();
-        }
     }
 
     /// <summary>Activates capture unless shutdown has begun.</summary>
     internal void ActivateCapture()
     {
-        if (!_quitting && !_exiting && !_disposed)
-        {
-            if (_appearanceDialog is not null)
-            {
-                _appearanceDialog.Activate();
-            }
-            else if (_shortcutDialog is not null)
-            {
-                _shortcutDialog.Activate();
-            }
-            else if (Capture.IsEnabled && _export?.ActiveExport is not { IsCompleted: false })
-            {
-                // Do not take focus from a modal dialog or an export's native save picker.
-                Capture.ShowCapture();
-            }
-        }
+        if (_quitting || _exiting || _disposed)
+            return;
+
+        if (_appearanceDialog is not null)
+            _appearanceDialog.Activate();
+        else if (_shortcutDialog is not null)
+            _shortcutDialog.Activate();
+        else if (Capture.IsEnabled && _export?.ActiveExport is not { IsCompleted: false })
+            Capture.ShowCapture();
     }
 
     private void RegisterCaptureShortcut()
@@ -115,24 +107,21 @@ internal sealed class ApplicationController : IDisposable
         // Construction creates the native window; registration does not need to show capture.
         _windowsShortcut = new WindowsCaptureShortcut(Capture, ActivateCapture);
         var registrationError = _windowsShortcut.Register(_committedShortcut);
-        if (registrationError is not null)
-        {
-            _shortcutError = string.IsNullOrEmpty(_shortcutError) ? registrationError : $"{_shortcutError}\n{registrationError}";
-        }
 
-        if (_shortcutError is not null)
-        {
-            var message = $"{_shortcutError}\nUse Capture shortcut… to change or disable it.";
-            Capture.SetStatus(_appearanceError is null ? message : $"{_appearanceError}\n{message}");
-        }
+        if (registrationError is not null)
+            _shortcutError = string.IsNullOrEmpty(_shortcutError) ? registrationError : $"{_shortcutError}\n{registrationError}";
+
+        if (_shortcutError is null)
+            return;
+
+        var message = $"{_shortcutError}\nUse Capture shortcut… to change or disable it.";
+        Capture.SetStatus(_appearanceError is null ? message : $"{_appearanceError}\n{message}");
     }
 
     private async void OnCaptureShortcut(object? sender, EventArgs e)
     {
         if (_quitting || _exiting || _disposed || !OperatingSystem.IsWindows())
-        {
             return;
-        }
 
         if (_shortcutDialog is not null)
         {
@@ -141,14 +130,13 @@ internal sealed class ApplicationController : IDisposable
         }
 
         if (!Capture.IsEnabled || _export?.ActiveExport is { IsCompleted: false })
-        {
             return;
-        }
 
         Capture.ShowCapture();
         var suspensionError = _windowsShortcut!.Suspend();
         var dialog = new CaptureShortcutDialog(_committedShortcut, SaveCaptureShortcut, suspensionError ?? _shortcutError);
         _shortcutDialog = dialog;
+
         try
         {
             await dialog.ShowDialog(Capture);
@@ -156,10 +144,12 @@ internal sealed class ApplicationController : IDisposable
         finally
         {
             _shortcutDialog = null;
+
             if (!dialog.Saved && !_exiting && !_disposed)
             {
                 // Cancellation abandons edits, but restoring the committed registration can still fail.
                 var restorationError = _windowsShortcut.Register(_committedShortcut);
+
                 if (restorationError is not null)
                 {
                     _shortcutError = $"Couldn't restore the previous capture shortcut.\n{restorationError}";
@@ -172,12 +162,12 @@ internal sealed class ApplicationController : IDisposable
     private string? SaveCaptureShortcut(CaptureShortcut? candidate)
     {
         var registrationError = _windowsShortcut!.Register(candidate);
+
         if (registrationError is not null)
-        {
             return registrationError;
-        }
 
         var settingsError = _settings.SaveShortcut(candidate);
+
         if (settingsError is not null)
         {
             // Leave the committed preference untouched and release the uncommitted candidate.
@@ -186,10 +176,9 @@ internal sealed class ApplicationController : IDisposable
         }
 
         _committedShortcut = candidate;
+
         if (_shortcutError is not null)
-        {
             Capture.SetStatus(_appearanceError);
-        }
 
         _shortcutError = null;
         return null;
@@ -212,6 +201,7 @@ internal sealed class ApplicationController : IDisposable
         Capture.ShowCapture();
         var dialog = new AppearanceDialog(_appearance, SaveAppearance, _appearanceError);
         _appearanceDialog = dialog;
+
         try
         {
             await dialog.ShowDialog(Capture);
@@ -225,11 +215,13 @@ internal sealed class ApplicationController : IDisposable
     private string? SaveAppearance(AppearancePreferences preferences)
     {
         var error = _settings.SaveAppearance(preferences);
+
         if (error is not null)
             return error;
 
         _appearance = preferences;
         _app.ApplyAppearance(preferences);
+
         if (_appearanceError is not null)
             Capture.SetStatus(_shortcutError);
 
@@ -240,19 +232,17 @@ internal sealed class ApplicationController : IDisposable
     /// <summary>Reports that shortcut activation has stopped working.</summary>
     internal void ShowActivationError()
     {
-        if (!_exiting && !_disposed)
-        {
-            Capture.SetStatus("Desktop shortcut activation stopped unexpectedly. You can still open capture from the tray or taskbar.");
-            ActivateCapture();
-        }
+        if (_exiting || _disposed)
+            return;
+
+        Capture.SetStatus("Desktop shortcut activation stopped unexpectedly. You can still open capture from the tray or taskbar.");
+        ActivateCapture();
     }
 
     private Task QuitAsync()
     {
         if (_quitTask.IsCompleted && !_exiting)
-        {
             _quitTask = QuitCoreAsync();
-        }
 
         return _quitTask;
     }
@@ -264,28 +254,25 @@ internal sealed class ApplicationController : IDisposable
         _appearanceDialog?.Close();
         Capture.SetAcceptingOperations(false);
         _export?.SetAcceptingOperations(false);
+
         try
         {
             // Retain the tasks before awaiting: their windows may finish or close in the meantime.
             var save = Capture.ActiveSave is { IsCompleted: false } activeSave ? activeSave : null;
             var export = _export?.ActiveExport is { IsCompleted: false } activeExport ? activeExport : null;
+
             if (export is not null)
-            {
                 _export!.ShowExport();
-            }
 
             var saved = save is null || await save;
             var exported = export is null || await export;
+
             if (!saved || !exported)
             {
                 if (!exported)
-                {
                     _export?.ShowExport();
-                }
                 else
-                {
                     Capture.ShowCapture();
-                }
 
                 return;
             }
@@ -294,10 +281,9 @@ internal sealed class ApplicationController : IDisposable
             {
                 Capture.ShowCapture();
                 var answer = await new DraftDialog().ShowDialog<DraftDecision>(Capture);
+
                 if (answer == DraftDecision.Cancel || (answer == DraftDecision.Save && !await Capture.SaveEntryAsync()))
-                {
                     return;
-                }
             }
 
             await _instance.StopAsync();
@@ -313,6 +299,7 @@ internal sealed class ApplicationController : IDisposable
         finally
         {
             _quitting = false;
+
             if (!_exiting && !_disposed)
             {
                 Capture.SetAcceptingOperations(true);
@@ -326,9 +313,7 @@ internal sealed class ApplicationController : IDisposable
     private void OnExport(object? sender, EventArgs e)
     {
         if (_quitting || _exiting)
-        {
             return;
-        }
 
         if (_export is null)
         {
@@ -342,17 +327,14 @@ internal sealed class ApplicationController : IDisposable
     private async void OnOpenFolder(object? sender, EventArgs e)
     {
         if (_quitting || _exiting)
-        {
             return;
-        }
 
         try
         {
             Directory.CreateDirectory(_store.Folder);
+
             if (!await Capture.Launcher.LaunchDirectoryInfoAsync(new DirectoryInfo(_store.Folder)))
-            {
                 throw new IOException("No file manager accepted the data folder.");
-            }
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException)
         {
@@ -371,11 +353,11 @@ internal sealed class ApplicationController : IDisposable
 
     private async void OnShutdownRequested(object? sender, ShutdownRequestedEventArgs e)
     {
-        if (!_exiting)
-        {
-            e.Cancel = true;
-            await QuitAsync();
-        }
+        if (_exiting)
+            return;
+
+        e.Cancel = true;
+        await QuitAsync();
     }
 
     /// <inheritdoc />
@@ -388,6 +370,7 @@ internal sealed class ApplicationController : IDisposable
 
         _disposed = true;
         _desktop.ShutdownRequested -= OnShutdownRequested;
+
         try
         {
             _shortcutDialog?.Close();

@@ -30,6 +30,7 @@ internal sealed class DesktopSettings(string folder)
             var document = ReadDocument();
             var savedScheme = ReadString(document["colourScheme"]);
             var scheme = ColourThemes.All.FirstOrDefault(theme => theme.Id.ToString() == savedScheme)?.Id ?? ColourScheme.Forest;
+
             var paletteId = document.TryGetPropertyValue("palette", out var palette)
                 ? ReadString(palette)
                 : ReadString(document["appearance"]) switch
@@ -38,8 +39,10 @@ internal sealed class DesktopSettings(string folder)
                     "Dark" => "dark",
                     _ => null,
                 };
+
             if (!ColourThemes.Get(scheme).HasPalette(paletteId))
                 paletteId = null;
+
             error = null;
             return new AppearancePreferences(scheme, paletteId);
         }
@@ -99,6 +102,7 @@ internal sealed class DesktopSettings(string folder)
     private void WriteDocument(JsonObject document)
     {
         string? temporaryFile = null;
+
         try
         {
             Directory.CreateDirectory(folder);

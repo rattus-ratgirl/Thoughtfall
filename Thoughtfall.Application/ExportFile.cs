@@ -13,6 +13,7 @@ internal static class ExportFile
     internal static void Write(string destination, IReadOnlyList<DiaryEntry> entries, ExportFormat format)
     {
         var temporary = Path.Combine(Path.GetDirectoryName(destination)!, $".thoughtfall-export-{Guid.NewGuid():N}.tmp");
+
         try
         {
             using (var output = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None))

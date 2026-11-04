@@ -10,14 +10,13 @@ public static class DiaryEntries
     /// <param name="entries">The entries to select from.</param>
     /// <param name="from">The inclusive first date.</param>
     /// <param name="to">The inclusive last date.</param>
-    /// <returns>A materialized selection in diary order.</returns>
+    /// <returns>A materialised selection in diary order.</returns>
     public static IReadOnlyList<DiaryEntry> SelectRange(IEnumerable<DiaryEntry> entries, DateOnly from, DateOnly to)
     {
         ArgumentNullException.ThrowIfNull(entries);
+
         if (from > to)
-        {
             throw new ArgumentException("The From date must be on or before the To date.");
-        }
 
         return entries
             .Where(entry => DateOnly.FromDateTime(entry.Timestamp.DateTime) >= from && DateOnly.FromDateTime(entry.Timestamp.DateTime) <= to)

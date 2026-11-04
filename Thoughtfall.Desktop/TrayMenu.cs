@@ -14,6 +14,7 @@ internal sealed class TrayMenu : IDisposable
     {
         var menu = new NativeMenu();
         AddItem(menu, "Capture a thought", (_, _) => CaptureRequested?.Invoke(this, EventArgs.Empty));
+
         if (OperatingSystem.IsWindows())
         {
             AddItem(menu, "Capture shortcut…", (_, _) => CaptureShortcutRequested?.Invoke(this, EventArgs.Empty));
@@ -26,6 +27,7 @@ internal sealed class TrayMenu : IDisposable
         AddItem(menu, "Quit", (_, _) => QuitRequested?.Invoke(this, EventArgs.Empty));
 
         using var icon = AssetLoader.Open(new Uri("avares://Thoughtfall.Desktop/Assets/Thoughtfall.ico"));
+
         _icon = new TrayIcon
         {
             Icon = new WindowIcon(icon),
@@ -33,6 +35,7 @@ internal sealed class TrayMenu : IDisposable
             Menu = menu,
             IsVisible = true,
         };
+
         _icon.Clicked += (_, _) => CaptureRequested?.Invoke(this, EventArgs.Empty);
         TrayIcon.SetIcons(app, [_icon]);
     }

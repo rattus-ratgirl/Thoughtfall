@@ -14,8 +14,9 @@ public static class EditorCommand
     {
         var words = new List<string>();
         var word = new StringBuilder();
-        char quote = '\0';
+        var quote = '\0';
         var started = false;
+
         foreach (var character in command)
         {
             if (quote != '\0')
@@ -32,12 +33,12 @@ public static class EditorCommand
             }
             else if (char.IsWhiteSpace(character))
             {
-                if (started)
-                {
-                    words.Add(word.ToString());
-                    word.Clear();
-                    started = false;
-                }
+                if (!started)
+                    continue;
+
+                words.Add(word.ToString());
+                word.Clear();
+                started = false;
             }
             else
             {
@@ -48,13 +49,18 @@ public static class EditorCommand
 
         if (quote != '\0')
             throw new ArgumentException("The editor command has an unclosed quote.");
+
         if (started)
             words.Add(word.ToString());
+
         if (words.Count == 0 || string.IsNullOrWhiteSpace(words[0]))
             throw new ArgumentException("The editor command is empty.");
+
         var result = new ProcessStartInfo(words[0]) { UseShellExecute = false };
+
         foreach (var argument in words.Skip(1))
             result.ArgumentList.Add(argument);
+
         result.ArgumentList.Add(draft);
         return result;
     }

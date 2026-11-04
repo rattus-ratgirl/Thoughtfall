@@ -15,15 +15,14 @@ public static class DiaryExport
 
         var ordered = DiaryEntries.SelectRange(entries, DateOnly.MinValue, DateOnly.MaxValue);
 
-        using (var writer = new Utf8JsonWriter(output, new JsonWriterOptions { Indented = true }))
-        {
-            writer.WriteStartObject();
+        using var writer = new Utf8JsonWriter(output, new JsonWriterOptions { Indented = true });
 
-            foreach (var year in ordered.GroupBy(entry => entry.Timestamp.Year))
-                WriteJsonYear(writer, year);
+        writer.WriteStartObject();
 
-            writer.WriteEndObject();
-        }
+        foreach (var year in ordered.GroupBy(entry => entry.Timestamp.Year))
+            WriteJsonYear(writer, year);
+
+        writer.WriteEndObject();
     }
 
     /// <summary>Writes notes beneath localized calendar headings with LF newlines, leaving the writer open and its settings unchanged.</summary>

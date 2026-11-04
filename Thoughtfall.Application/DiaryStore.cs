@@ -8,7 +8,7 @@ public sealed class DiaryStore
 {
     private readonly SemaphoreSlim _gate = new(1, 1);
 
-    /// <summary>Initializes a new instance of the <see cref="DiaryStore"/> class.</summary>
+    /// <summary>Initialises a new instance of the <see cref="DiaryStore"/> class.</summary>
     /// <param name="folder">The private diary data directory.</param>
     public DiaryStore(string folder)
     {
@@ -27,12 +27,11 @@ public sealed class DiaryStore
     public async Task<bool> SaveAsync(string text)
     {
         if (string.IsNullOrWhiteSpace(text))
-        {
             return false;
-        }
 
         var entry = new DiaryEntry(Guid.NewGuid(), DateTimeOffset.Now, text);
         await _gate.WaitAsync().ConfigureAwait(false);
+
         try
         {
             // Microsoft.Data.Sqlite's async APIs execute synchronously; move the whole operation.
@@ -71,6 +70,7 @@ public sealed class DiaryStore
         }
 
         await _gate.WaitAsync().ConfigureAwait(false);
+
         try
         {
             return await Task.Run(() =>
@@ -101,6 +101,7 @@ public sealed class DiaryStore
     public Task ExportAsync(string destination, IReadOnlyList<DiaryEntry> entries, ExportFormat format)
     {
         ArgumentNullException.ThrowIfNull(entries);
+
         return Task.Run(() =>
         {
             var path = Path.GetFullPath(destination);
@@ -108,6 +109,7 @@ public sealed class DiaryStore
             path = Path.Combine(parent, Path.GetFileName(path));
             var folder = Path.TrimEndingDirectorySeparator(DataPaths.ResolveDirectory(Folder));
             var comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
             if (path.Equals(folder, comparison) || path.StartsWith(folder + Path.DirectorySeparatorChar, comparison))
             {
                 throw new IOException("Choose a file outside the diary data folder.");
@@ -120,6 +122,7 @@ public sealed class DiaryStore
     private SqliteConnection OpenDatabase()
     {
         Directory.CreateDirectory(Folder);
+
         var connection = new SqliteConnection(
             new SqliteConnectionStringBuilder
             {
@@ -128,6 +131,7 @@ public sealed class DiaryStore
                 Pooling = false,
             }.ToString()
         );
+
         try
         {
             connection.Open();
@@ -138,6 +142,7 @@ public sealed class DiaryStore
             command.Transaction = transaction;
             command.CommandText = "PRAGMA user_version";
             var version = Convert.ToInt32(command.ExecuteScalar(), CultureInfo.InvariantCulture);
+
             if (version == 0)
             {
                 command.CommandText = "SELECT COUNT(*) FROM sqlite_schema WHERE name NOT LIKE 'sqlite_%'";

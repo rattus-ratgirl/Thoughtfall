@@ -20,12 +20,14 @@ internal sealed class DesktopInstance : IDisposable
     {
         Directory.CreateDirectory(folder);
         var identity = Path.TrimEndingDirectorySeparator(Path.GetFullPath(folder));
+
         if (OperatingSystem.IsWindows())
         {
             identity = identity.ToUpperInvariant();
         }
 
         _pipeName = "Thoughtfall-" + Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(identity)))[..24];
+
         try
         {
             _lock = new FileStream(Path.Combine(folder, ".instance.lock"), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
@@ -73,12 +75,20 @@ internal sealed class DesktopInstance : IDisposable
     internal async Task RequestCaptureAsync()
     {
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+
         try
         {
-            using var client = new NamedPipeClientStream(".", _pipeName, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
+            await using var client = new NamedPipeClientStream(
+                ".",
+                _pipeName,
+                PipeDirection.InOut,
+                PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly
+            );
+
             await client.ConnectAsync(timeout.Token).ConfigureAwait(false);
             await client.WriteAsync(new byte[] { 1 }, timeout.Token).ConfigureAwait(false);
             var response = new byte[1];
+
             if (await client.ReadAsync(response, timeout.Token).ConfigureAwait(false) != 1 || response[0] != 1)
             {
                 throw new IOException("The running copy did not acknowledge the capture request.");
@@ -113,11 +123,13 @@ internal sealed class DesktopInstance : IDisposable
             while (!_stop.IsCancellationRequested)
             {
                 await _server!.WaitForConnectionAsync(_stop.Token).ConfigureAwait(false);
+
                 try
                 {
                     using var timeout = CancellationTokenSource.CreateLinkedTokenSource(_stop.Token);
                     timeout.CancelAfter(TimeSpan.FromSeconds(5));
                     var request = new byte[1];
+
                     if (await _server.ReadAsync(request, timeout.Token).ConfigureAwait(false) == 1 && request[0] == 1)
                     {
                         capture();
@@ -156,6 +168,7 @@ internal sealed class DesktopInstance : IDisposable
     private async Task StopCoreAsync()
     {
         await _stop.CancelAsync().ConfigureAwait(false);
+
         if (_listener is not null)
         {
             await _listener.ConfigureAwait(false);
@@ -171,6 +184,7 @@ internal sealed class DesktopInstance : IDisposable
         }
 
         _disposed = true;
+
         try
         {
             StopAsync().GetAwaiter().GetResult();

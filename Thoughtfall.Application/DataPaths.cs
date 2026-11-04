@@ -24,13 +24,11 @@ public static class DataPaths
     /// </summary>
     /// <param name="path">The directory path to resolve.</param>
     /// <returns>The resolved directory path.</returns>
-    internal static string ResolveDirectory(string path)
-    {
-        return ResolveDirectory(
+    internal static string ResolveDirectory(string path) =>
+        ResolveDirectory(
             Path.GetFullPath(path),
             new HashSet<string>(OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal)
         );
-    }
 
     private static string ResolveDirectory(string path, HashSet<string> links)
     {
