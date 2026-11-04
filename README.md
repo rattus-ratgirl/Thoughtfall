@@ -45,7 +45,7 @@ Open `Thoughtfall.slnx` in your IDE and select `Thoughtfall.Desktop` to debug. L
 - **Close**, closing the capture window, or pressing **Escape** retains the draft and hides capture when tray support is available. Linux and desktops without a tray minimize it instead.
 - Capture and the tray offer export and the data folder. Tray-menu **Quit** exits Thoughtfall; capture offers **Quit** when usable tray support is unavailable. A second ordinary launch leaves the running application as it is.
 - On Windows, **Ctrl+Alt+J** opens capture from any application while Thoughtfall remains running. Choose **Capture shortcut…** in capture or the tray to record a different chord, restore the default, or **Clear** and **Save** to disable it. Global shortcuts and their controls are Windows-only.
-- Choose **Appearance…** in capture or the tray on Windows or Linux. Choose a colour scheme (**Forest** or **Hearth**) and one of its named palettes, or **Match System** to follow your desktop's light or dark setting. Both scheme and palette changes apply immediately after **Save**. **Cancel**, Escape, or closing the dialog discards edits. The default is Hearth + Match System.
+- Choose **Appearance…** in capture or the tray on Windows or Linux. Choose **Forest**, **Hearth**, or **Catppuccin**, then a named palette or **Match System**. Catppuccin offers **Latte**, **Frappé**, **Macchiato**, and **Mocha**, with Mauve accents; Match System uses Latte in light mode and Mocha in dark mode. Both scheme and palette changes apply immediately after **Save**. **Cancel**, Escape, or closing the dialog discards edits. The default is Forest + Match System; saved choices are preserved.
 - Quit waits for an active save or export, including an open save picker. Complete or cancel the picker to continue. A failed operation keeps the application open. Remaining drafts offer Save, Discard, or Cancel.
 
 Drafts exist only in memory until saved. The app does not start automatically at sign-in. A desktop shortcut may run the executable with `--capture` to open capture directly, including when Thoughtfall is already running. The Start menu shortcut starts Thoughtfall quietly in the tray when supported.
@@ -56,7 +56,7 @@ Release builds store the SQLite database at **`~/.thoughtfall/data.db3`**, where
 
 Debug builds use the executable directory instead, keeping `data.db3`, `settings.json`, and the instance lock separate from Release data. This includes the default `dotnet run` and IDE Debug configurations. Existing data is not moved or copied between configurations.
 
-Appearance preferences (`colourScheme` and `palette`) and the Windows capture shortcut (`captureShortcut`) share `~/.thoughtfall/settings.json`, separately from diary data. `palette` is a palette ID, or `null` for Match System. Missing or unknown appearance preferences independently default to Hearth and Match System. Existing System/Light/Dark settings are read automatically and migrated when appearance is next saved. Saving either feature preserves the other settings; read and write failures are shown in the app.
+Appearance preferences (`colourScheme` and `palette`) and the Windows capture shortcut (`captureShortcut`) share `~/.thoughtfall/settings.json`, separately from diary data. `palette` is a palette ID, or `null` for Match System. Missing or unknown appearance preferences independently default to Forest and Match System. Existing System/Light/Dark settings are read automatically and migrated when appearance is next saved. Saving either feature preserves the other settings; read and write failures are shown in the app.
 
 The database is created on the first save or export. Schema version 1 contains a single `entries` table:
 
@@ -123,7 +123,16 @@ Publish self-contained folders; copy the entire output directory, including nati
 
 ```sh
 dotnet publish Thoughtfall.Desktop -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -p:PublishTrimmed=false -o artifacts/publish/win-x64 -warnaserror
+cp LICENSE artifacts/publish/win-x64/
+python scripts/collect-notices.py Thoughtfall.Desktop/obj/project.assets.json artifacts/publish/win-x64
+
 dotnet publish Thoughtfall.Desktop -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=false -p:PublishTrimmed=false -o artifacts/publish/linux-x64 -warnaserror
+cp LICENSE artifacts/publish/linux-x64/
+python3 scripts/collect-notices.py Thoughtfall.Desktop/obj/project.assets.json artifacts/publish/linux-x64
 ```
 
 Run `Thoughtfall.Desktop.exe` on Windows or `Thoughtfall.Desktop` on Linux. Linux still needs its desktop/native system dependencies; a cross-platform publish does not validate those. Windows and Linux installer builds are described in [Publishing](docs/PUBLISHING.md).
+
+## Credits
+
+The Catppuccin palettes are from [Catppuccin](https://github.com/catppuccin/catppuccin), used under the [MIT licence](packaging/licenses/Catppuccin-MIT.txt). Desktop distributions include its full copyright and licence notice.

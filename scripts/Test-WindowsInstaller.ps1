@@ -72,12 +72,23 @@ $requiredFiles = @(
     'e_sqlite3.dll'
     'LICENSE'
     'THIRD-PARTY-NOTICES.md'
+    'licenses/Catppuccin-MIT.txt'
 )
 
 foreach ($file in $requiredFiles) {
     if (!(Test-Path (Join-Path $installDirectory $file))) {
         throw "Missing installed dependency: $file"
     }
+}
+
+if ((Get-FileHash (Join-Path $installDirectory 'licenses/Catppuccin-MIT.txt')).Hash -ne (Get-FileHash (Join-Path $root 'packaging/licenses/Catppuccin-MIT.txt')).Hash) {
+    throw 'The installed Catppuccin licence differs from the upstream notice.'
+}
+if (!(Select-String -LiteralPath (Join-Path $installDirectory 'THIRD-PARTY-NOTICES.md') -Pattern '## Catppuccin palette v1.8.0' -SimpleMatch -Quiet)) {
+    throw 'Catppuccin attribution is missing from the desktop notices.'
+}
+if ((Test-Path (Join-Path $cliDirectory 'licenses/Catppuccin-MIT.txt')) -or (Select-String -LiteralPath (Join-Path $cliDirectory 'THIRD-PARTY-NOTICES.md') -Pattern 'Catppuccin' -SimpleMatch -Quiet)) {
+    throw 'The CLI should not include desktop theme notices.'
 }
 
 $shortcut = Join-Path ([Environment]::GetFolderPath('Programs')) 'Thoughtfall.lnk'

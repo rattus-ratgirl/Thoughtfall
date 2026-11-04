@@ -13,7 +13,7 @@ internal partial class AppearanceDialog : Window
     {
         InitializeComponent();
         SchemePicker.ItemsSource = ColourThemes.All;
-        SchemePicker.SelectedItem = ColourThemes.Get(ColourScheme.Hearth);
+        SchemePicker.SelectedItem = ColourThemes.Get(new AppearancePreferences().ColourScheme);
         SetPalettes(null);
         SchemePicker.SelectionChanged += (_, _) => SetPalettes(null);
     }

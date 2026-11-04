@@ -42,3 +42,40 @@ When upgrading Avalonia, run the appearance resource tests. They check compiled
 palette resources, live controls, dropdowns, and several custom variants with the
 same fallback. The implementation relies on Fluent's public resources retaining
 the base-colour and control-brush structure used by the adapter.
+
+## Catppuccin
+
+Catppuccin provides Latte, Frappé, Macchiato, and Mocha, using the official
+[palette definitions from v1.8.0](https://github.com/catppuccin/palette/blob/v1.8.0/palette.json).
+Its system assignments are Latte for light mode and Mocha for dark mode.
+Latte inherits Light; the other three palettes inherit Dark. Each can also be
+selected explicitly. Forest remains the default for new or missing settings,
+and saved choices, including Hearth, are preserved.
+
+The application mapping follows Catppuccin's
+[style guide](https://github.com/catppuccin/catppuccin/blob/main/docs/style-guide.md):
+
+| Role | Catppuccin colour |
+| --- | --- |
+| Page | Base |
+| Editor and control surface | Mantle |
+| Hover surface and notice background | Surface0 |
+| Borders | Surface1 |
+| Main text | Text |
+| Secondary text | Subtext1 |
+| Accent and primary button | Mauve |
+| Text on accent fills | Base |
+| Text selection | Overlay2 at 25% opacity |
+
+Primary and selected-row hover/pressed fills mix Mauve towards Text by 10%
+and 20% in sRGB channels, rounded to the nearest byte. These values are written
+directly into the palette files. Fluent uses the same palette's text,
+surface, overlay, and neutral shades, with Red for errors. Accent-button,
+calendar-highlight, and selected-row text use Base for legibility on Mauve.
+
+The [full upstream MIT licence](../packaging/licenses/Catppuccin-MIT.txt),
+including `Copyright (c) 2021 Catppuccin`, is retained verbatim from
+[v1.8.0](https://github.com/catppuccin/palette/blob/v1.8.0/LICENSE).
+The notices collector includes it with desktop distributions and records the
+source/version in their third-party notices. Thoughtfall's own licence is
+unchanged.

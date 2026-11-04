@@ -28,7 +28,8 @@ internal sealed class DesktopSettings(string folder)
         try
         {
             var document = ReadDocument();
-            var scheme = ReadString(document["colourScheme"]) == "Forest" ? ColourScheme.Forest : ColourScheme.Hearth;
+            var savedScheme = ReadString(document["colourScheme"]);
+            var scheme = ColourThemes.All.FirstOrDefault(theme => theme.Id.ToString() == savedScheme)?.Id ?? ColourScheme.Forest;
             var paletteId = document.TryGetPropertyValue("palette", out var palette)
                 ? ReadString(palette)
                 : ReadString(document["appearance"]) switch
@@ -44,7 +45,7 @@ internal sealed class DesktopSettings(string folder)
         }
         catch (Exception ex) when (IsSettingsError(ex))
         {
-            error = $"Couldn't read appearance settings. Using Hearth and Match System for now.\n{ex.Message}";
+            error = $"Couldn't read appearance settings. Using Forest and Match System for now.\n{ex.Message}";
             return new AppearancePreferences();
         }
     }

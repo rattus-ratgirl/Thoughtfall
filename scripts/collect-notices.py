@@ -1,4 +1,4 @@
-"""Collect NuGet metadata, packaged notices, and runtime licences for distribution."""
+"""Collect NuGet metadata, bundled asset notices, and runtime licences for distribution."""
 
 import json
 from pathlib import Path
@@ -13,7 +13,7 @@ root = Path(__file__).resolve().parent.parent
 destination = publish / "licenses"
 destination.mkdir()
 package_roots = [Path(folder) for folder in assets["packageFolders"]]
-summary = ["# Third-party notices", "", "Includes restored dependencies and bundled runtime notices.", ""]
+summary = ["# Third-party notices", "", "Includes third-party materials and bundled runtime notices.", ""]
 mit = (root / "LICENSE").read_text().split("Permission is hereby granted", 1)[1]
 mit = "Permission is hereby granted" + mit
 
@@ -63,4 +63,17 @@ for identity in runtime_packs:
 # the MIT licence on the NuGet wrapper.
 if any(name.startswith("Avalonia.Fonts.Inter/") for name in assets["libraries"]):
     shutil.copyfile(root / "packaging/licenses/Inter-OFL.txt", destination / "Inter-OFL.txt")
+
+if assets["project"]["restore"]["projectName"] == "Thoughtfall.Desktop":
+    shutil.copyfile(root / "packaging/licenses/Catppuccin-MIT.txt", destination / "Catppuccin-MIT.txt")
+    summary.extend([
+        "## Catppuccin palette v1.8.0",
+        "",
+        "Copyright (c) 2021 Catppuccin",
+        "",
+        "Source: https://github.com/catppuccin/palette/tree/v1.8.0",
+        "",
+        "Licence: MIT. Full notice: licenses/Catppuccin-MIT.txt",
+        "",
+    ])
 (publish / "THIRD-PARTY-NOTICES.md").write_text("\n".join(summary), encoding="utf-8")

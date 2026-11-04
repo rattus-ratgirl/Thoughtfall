@@ -2,7 +2,9 @@ namespace Thoughtfall.Tests;
 
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Presenters;
 using Avalonia.Headless;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
@@ -56,6 +58,56 @@ internal sealed class AppearanceResourceTests
         });
     }
 
+    [TestCase("latte", "#eff1f5", "#4c4f69", "#8839ef", "#823be2", "#7c3dd4")]
+    [TestCase("frappe", "#303446", "#c6d0f5", "#ca9ee6", "#caa3e8", "#c9a8e9")]
+    [TestCase("macchiato", "#24273a", "#cad3f5", "#c6a0f6", "#c6a5f6", "#c7aaf6")]
+    [TestCase("mocha", "#1e1e2e", "#cdd6f4", "#cba6f7", "#cbabf7", "#cbb0f6")]
+    public void CatppuccinUsesItsColoursAndLegibleAccentStates(
+        string paletteId,
+        string page,
+        string text,
+        string accent,
+        string hover,
+        string pressed
+    )
+    {
+        var app = (App)Application.Current!;
+        app.ApplyAppearance(new AppearancePreferences(ColourScheme.Catppuccin, paletteId));
+        var variant = app.RequestedThemeVariant;
+        Color Brush(string key) => ((ISolidColorBrush)app.FindResource(variant, key)!).Color;
+        Assert.Multiple(() =>
+        {
+            Assert.That(Brush("PageBrush"), Is.EqualTo(Color.Parse(page)));
+            Assert.That(Brush("TextBrush"), Is.EqualTo(Color.Parse(text)));
+            Assert.That(Brush("TextControlForeground"), Is.EqualTo(Color.Parse(text)));
+            Assert.That(Brush("AccentButtonBackground"), Is.EqualTo(Color.Parse(accent)));
+            Assert.That(Brush("AccentButtonBackgroundPointerOver"), Is.EqualTo(Color.Parse(hover)));
+            Assert.That(Brush("AccentButtonBackgroundPressed"), Is.EqualTo(Color.Parse(pressed)));
+            Assert.That(Brush("SelectionBrush").A, Is.EqualTo(64));
+            foreach (
+                var foreground in new[]
+                {
+                    "AccentButtonForeground",
+                    "AccentButtonForegroundPointerOver",
+                    "AccentButtonForegroundPressed",
+                    "CalendarViewTodayForeground",
+                    "ComboBoxItemForegroundSelected",
+                    "ComboBoxItemForegroundSelectedPointerOver",
+                    "ComboBoxItemForegroundSelectedPressed",
+                }
+            )
+                Assert.That(Brush(foreground), Is.EqualTo(Color.Parse(page)), foreground);
+            foreach (var background in new[] { "PageBrush", "SurfaceBrush" })
+            {
+                Assert.That(Contrast(Brush("TextBrush"), Brush(background)), Is.GreaterThanOrEqualTo(4.5), background);
+                Assert.That(Contrast(Brush("MutedTextBrush"), Brush(background)), Is.GreaterThanOrEqualTo(4.5), background);
+            }
+            Assert.That(Contrast(Brush("TextBrush"), Brush("NoticeBrush")), Is.GreaterThanOrEqualTo(4.5), "notice text");
+            foreach (var background in new[] { "PrimaryBrush", "PrimaryHoverBrush", "PrimaryPressedBrush" })
+                Assert.That(Contrast(Brush("PrimaryTextBrush"), Brush(background)), Is.GreaterThanOrEqualTo(4.5), background);
+        });
+    }
+
     [Test]
     public void ExistingControlsAndPopupsSwitchAcrossAllPalettes()
     {
@@ -63,6 +115,7 @@ internal sealed class AppearanceResourceTests
         var input = new TextBox { Text = "A quiet thought" };
         var picker = new ComboBox { ItemsSource = new[] { "JSON", "Markdown" }, SelectedIndex = 0 };
         var calendar = new CalendarDatePicker { SelectedDate = new DateTime(2026, 11, 3) };
+        var button = new Button { Content = "Save", Classes = { "primary" } };
         var window = new Window
         {
             Title = "Appearance resource check",
@@ -78,7 +131,7 @@ internal sealed class AppearanceResourceTests
                     input,
                     picker,
                     calendar,
-                    new Button { Content = "Save", Classes = { "primary" } },
+                    button,
                 },
             },
         };
@@ -106,6 +159,20 @@ internal sealed class AppearanceResourceTests
                     Dispatcher.UIThread.RunJobs();
                     var item = picker.ContainerFromIndex(0)!;
                     Assert.That(item.ActualThemeVariant, Is.EqualTo(variant));
+                    if (theme.Id == ColourScheme.Catppuccin)
+                    {
+                        var presenter = item.GetVisualDescendants()
+                            .OfType<ContentPresenter>()
+                            .Single(control => control.Name == "PART_ContentPresenter");
+                        Assert.That(
+                            ((ISolidColorBrush)presenter.Foreground!).Color,
+                            Is.EqualTo(((ISolidColorBrush)app.FindResource(variant, "PageBrush")!).Color)
+                        );
+                        using var popupFrame = TopLevel.GetTopLevel(item)!.CaptureRenderedFrame();
+                        var popupScreenshot = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"Catppuccin-{palette.Id}-dropdown.png");
+                        popupFrame!.Save(popupScreenshot, PngBitmapEncoderOptions.Default);
+                        TestContext.AddTestAttachment(popupScreenshot);
+                    }
                     picker.IsDropDownOpen = false;
                     calendar.IsDropDownOpen = true;
                     Dispatcher.UIThread.RunJobs();
@@ -116,6 +183,54 @@ internal sealed class AppearanceResourceTests
                     var screenshot = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"{theme.Id}-{palette.Id}.png");
                     frame!.Save(screenshot, PngBitmapEncoderOptions.Default);
                     TestContext.AddTestAttachment(screenshot);
+                    if (theme.Id == ColourScheme.Catppuccin)
+                    {
+                        var point = button.TranslatePoint(new Point(button.Bounds.Width / 2, button.Bounds.Height / 2), window)!.Value;
+                        window.MouseMove(point);
+                        foreach (var isPressed in new[] { false, true })
+                        {
+                            if (isPressed)
+                                window.MouseDown(point, MouseButton.Left);
+                            Dispatcher.UIThread.RunJobs();
+                            var presenter = button
+                                .GetVisualDescendants()
+                                .OfType<ContentPresenter>()
+                                .Single(control => control.Name == "PART_ContentPresenter");
+                            Assert.Multiple(() =>
+                            {
+                                Assert.That(button.IsPointerOver, Is.True);
+                                Assert.That(button.IsPressed, Is.EqualTo(isPressed));
+                                Assert.That(
+                                    ((ISolidColorBrush)presenter.Background!).Color,
+                                    Is.EqualTo(
+                                        ((ISolidColorBrush)app.FindResource(variant, isPressed ? "PrimaryPressedBrush" : "PrimaryHoverBrush")!).Color
+                                    )
+                                );
+                            });
+                            using var stateFrame = window.CaptureRenderedFrame();
+                            var stateScreenshot = Path.Combine(
+                                TestContext.CurrentContext.WorkDirectory,
+                                $"Catppuccin-{palette.Id}-{(isPressed ? "pressed" : "hover")}.png"
+                            );
+                            stateFrame!.Save(stateScreenshot, PngBitmapEncoderOptions.Default);
+                            TestContext.AddTestAttachment(stateScreenshot);
+                        }
+                        window.MouseUp(point, MouseButton.Left);
+                        window.MouseMove(new Point(1, 1));
+                        var dialog = new AppearanceDialog(new AppearancePreferences(theme.Id, palette.Id), _ => null, null);
+                        try
+                        {
+                            dialog.Show(window);
+                            using var dialogFrame = dialog.CaptureRenderedFrame();
+                            var dialogScreenshot = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"Catppuccin-{palette.Id}-appearance.png");
+                            dialogFrame!.Save(dialogScreenshot, PngBitmapEncoderOptions.Default);
+                            TestContext.AddTestAttachment(dialogScreenshot);
+                        }
+                        finally
+                        {
+                            dialog.Close();
+                        }
+                    }
                 }
             }
             Assert.That(app.Styles.OfType<FluentTheme>().Count(), Is.EqualTo(1));
@@ -166,7 +281,7 @@ internal sealed class AppearanceResourceTests
     {
         var app = (App)Application.Current!;
         var theme = ColourThemes.Get(ColourScheme.Hearth);
-        app.ApplyAppearance(new AppearancePreferences());
+        app.ApplyAppearance(new AppearancePreferences(ColourScheme.Hearth));
         app.UpdateSystemAppearance(PlatformThemeVariant.Dark);
         Assert.That(app.RequestedThemeVariant, Is.EqualTo(theme.GetVariant("dark")));
         app.UpdateSystemAppearance(PlatformThemeVariant.Light);
@@ -174,6 +289,24 @@ internal sealed class AppearanceResourceTests
         app.ApplyAppearance(new AppearancePreferences(ColourScheme.Hearth, "dark"));
         app.UpdateSystemAppearance(PlatformThemeVariant.Light);
         Assert.That(app.RequestedThemeVariant, Is.EqualTo(theme.GetVariant("dark")));
+    }
+
+    [TestCase(null)]
+    [TestCase("frappe")]
+    [TestCase("macchiato")]
+    public void CatppuccinMatchesSystemOrKeepsAnExplicitPalette(string? paletteId)
+    {
+        var app = (App)Application.Current!;
+        var theme = ColourThemes.Get(ColourScheme.Catppuccin);
+        app.ApplyAppearance(new AppearancePreferences(ColourScheme.Catppuccin, paletteId));
+        foreach (var system in new[] { PlatformThemeVariant.Light, PlatformThemeVariant.Dark, PlatformThemeVariant.Light })
+        {
+            app.UpdateSystemAppearance(system);
+            Assert.That(
+                app.RequestedThemeVariant,
+                Is.EqualTo(theme.GetVariant(paletteId ?? (system == PlatformThemeVariant.Light ? "latte" : "mocha")))
+            );
+        }
     }
 
     [TestCase(false)]
@@ -200,7 +333,7 @@ internal sealed class AppearanceResourceTests
             dialog.Show();
             var scheme = dialog.FindControl<ComboBox>("SchemePicker")!;
             var palette = dialog.FindControl<ComboBox>("ModePicker")!;
-            scheme.SelectedItem = ColourThemes.Get(ColourScheme.Forest);
+            scheme.SelectedItem = ColourThemes.Get(ColourScheme.Hearth);
             palette.SelectedIndex = 2;
             Assert.That(app.RequestedThemeVariant, Is.EqualTo(before));
             if (!failSave)
@@ -214,9 +347,9 @@ internal sealed class AppearanceResourceTests
             save.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             Assert.Multiple(() =>
             {
-                Assert.That(saved, Is.EqualTo(failSave ? null : new AppearancePreferences(ColourScheme.Forest, "dark")));
+                Assert.That(saved, Is.EqualTo(failSave ? null : new AppearancePreferences(ColourScheme.Hearth, "dark")));
                 Assert.That(dialog.IsVisible, Is.EqualTo(failSave));
-                Assert.That(app.RequestedThemeVariant, Is.EqualTo(failSave ? before : ColourThemes.Get(ColourScheme.Forest).GetVariant("dark")));
+                Assert.That(app.RequestedThemeVariant, Is.EqualTo(failSave ? before : ColourThemes.Get(ColourScheme.Hearth).GetVariant("dark")));
             });
         }
         finally
@@ -244,7 +377,7 @@ internal sealed class AppearanceResourceTests
         try
         {
             dialog.Show();
-            dialog.FindControl<ComboBox>("SchemePicker")!.SelectedItem = ColourThemes.Get(ColourScheme.Forest);
+            dialog.FindControl<ComboBox>("SchemePicker")!.SelectedItem = ColourThemes.Get(ColourScheme.Hearth);
             dialog.FindControl<ComboBox>("ModePicker")!.SelectedIndex = 2;
             if (closeWindow)
                 dialog.Close();
@@ -299,5 +432,40 @@ internal sealed class AppearanceResourceTests
         {
             dialog.Close();
         }
+    }
+
+    [Test]
+    public void DesignerDefaultsToForestAndListsTheFourCatppuccinPalettes()
+    {
+        var dialog = new AppearanceDialog();
+        try
+        {
+            var scheme = dialog.FindControl<ComboBox>("SchemePicker")!;
+            var palette = dialog.FindControl<ComboBox>("ModePicker")!;
+            Assert.That(((ColourTheme)scheme.SelectedItem!).Id, Is.EqualTo(ColourScheme.Forest));
+            Assert.That(palette.SelectedItem!.ToString(), Is.EqualTo("Match System"));
+            scheme.SelectedItem = ColourThemes.Get(ColourScheme.Catppuccin);
+            Assert.That(
+                palette.Items.Select(item => item!.ToString()),
+                Is.EqualTo(new[] { "Match System", "Latte", "Frappé", "Macchiato", "Mocha" })
+            );
+        }
+        finally
+        {
+            dialog.Close();
+        }
+    }
+
+    private static double Contrast(Color first, Color second)
+    {
+        static double Linear(byte channel)
+        {
+            var value = channel / 255.0;
+            return value <= 0.04045 ? value / 12.92 : Math.Pow((value + 0.055) / 1.055, 2.4);
+        }
+        static double Luminance(Color colour) => 0.2126 * Linear(colour.R) + 0.7152 * Linear(colour.G) + 0.0722 * Linear(colour.B);
+        var a = Luminance(first);
+        var b = Luminance(second);
+        return (Math.Max(a, b) + 0.05) / (Math.Min(a, b) + 0.05);
     }
 }

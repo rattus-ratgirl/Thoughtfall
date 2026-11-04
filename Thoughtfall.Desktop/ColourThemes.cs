@@ -80,10 +80,22 @@ internal static class ColourThemes
                 "light",
                 "dark"
             ),
+            new(
+                ColourScheme.Catppuccin,
+                "Catppuccin",
+                [
+                    Palette("Catppuccin", "latte", "Latte", ThemeVariant.Light),
+                    Palette("Catppuccin", "frappe", "Frappé", ThemeVariant.Dark),
+                    Palette("Catppuccin", "macchiato", "Macchiato", ThemeVariant.Dark),
+                    Palette("Catppuccin", "mocha", "Mocha", ThemeVariant.Dark),
+                ],
+                "latte",
+                "mocha"
+            ),
         ]);
 
     internal static ColourTheme Get(ColourScheme id) =>
-        All.FirstOrDefault(theme => theme.Id == id) ?? All.Single(theme => theme.Id == ColourScheme.Hearth);
+        All.FirstOrDefault(theme => theme.Id == id) ?? All.Single(theme => theme.Id == ColourScheme.Forest);
 
     private static ColourPalette Palette(string theme, string id, string name, ThemeVariant baseVariant) =>
         new(id, name, baseVariant, new Uri($"avares://Thoughtfall.Desktop/Themes/Palettes/{theme}/{id}.axaml"));

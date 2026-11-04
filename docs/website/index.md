@@ -36,7 +36,7 @@ When you want to read through what you've collected, choose **Export entries…*
 
 ## Make it comfortable.
 
-Thoughtfall starts with **Hearth**, the warm brown and peach colours of this website, and follows your computer's light or dark setting. Choose **Appearance…** to switch to **Forest**, a quiet green, and select a palette or **Match System**. Both colour scheme and palette changes apply when you save.
+Thoughtfall starts with **Forest**, a quiet green, and follows your computer's light or dark setting. Choose **Appearance…** to try **Hearth**, a warm brown and peach theme, or **Catppuccin**, with Latte, Frappé, Macchiato, and Mocha palettes and Mauve accents. Catppuccin's **Match System** uses Latte in light mode and Mocha in dark mode. Both colour scheme and palette changes apply when you save; existing saved choices are kept.
 
 ## Your writing stays on your computer.
 

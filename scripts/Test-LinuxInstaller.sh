@@ -59,6 +59,13 @@ for file in Thoughtfall.Desktop libcoreclr.so libe_sqlite3.so libSkiaSharp.so li
     [[ -s /usr/lib/thoughtfall/$file ]]
 done
 [[ -d /usr/lib/thoughtfall/licenses ]]
+cmp "$root/packaging/licenses/Catppuccin-MIT.txt" /usr/lib/thoughtfall/licenses/Catppuccin-MIT.txt
+grep -Fxq '## Catppuccin palette v1.8.0' /usr/lib/thoughtfall/THIRD-PARTY-NOTICES.md
+[[ ! -e /usr/lib/thoughtfall/cli/licenses/Catppuccin-MIT.txt ]]
+if grep -Fq 'Catppuccin' /usr/lib/thoughtfall/cli/THIRD-PARTY-NOTICES.md; then
+    echo 'The CLI should not include desktop theme notices.' >&2
+    exit 1
+fi
 [[ -x /usr/lib/thoughtfall/Thoughtfall.Desktop && -x /usr/bin/thoughtfall ]]
 [[ -x /usr/bin/thoughtfall-gui && -x /usr/lib/thoughtfall/cli/thoughtfall ]]
 [[ -s /usr/share/doc/thoughtfall/copyright ]]

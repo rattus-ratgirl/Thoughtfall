@@ -20,19 +20,22 @@ internal sealed class AppearanceSettingsTests
     [TearDown]
     public void RemoveFolder() => Directory.Delete(_folder, true);
 
-    [TestCase("Light", "light")]
-    [TestCase("Dark", "dark")]
-    [TestCase("System", null)]
-    [TestCase("unknown", null)]
-    public void LegacyAppearanceMigratesWithoutWriting(string legacy, string? paletteId)
+    [TestCase("Forest", "Light", "light")]
+    [TestCase("Forest", "Dark", "dark")]
+    [TestCase("Forest", "System", null)]
+    [TestCase("Forest", "unknown", null)]
+    [TestCase("Hearth", "Light", "light")]
+    [TestCase("Hearth", "Dark", "dark")]
+    [TestCase("Hearth", "System", null)]
+    public void LegacyAppearanceMigratesWithoutWriting(string scheme, string legacy, string? paletteId)
     {
-        var json = new JsonObject { ["colourScheme"] = "Forest", ["appearance"] = legacy }.ToJsonString();
+        var json = new JsonObject { ["colourScheme"] = scheme, ["appearance"] = legacy }.ToJsonString();
         File.WriteAllText(SettingsPath, json);
         var result = new DesktopSettings(_folder).LoadAppearance(out var error);
         Assert.Multiple(() =>
         {
             Assert.That(error, Is.Null);
-            Assert.That(result, Is.EqualTo(new AppearancePreferences(ColourScheme.Forest, paletteId)));
+            Assert.That(result, Is.EqualTo(new AppearancePreferences(Enum.Parse<ColourScheme>(scheme), paletteId)));
             Assert.That(File.ReadAllText(SettingsPath), Is.EqualTo(json));
         });
     }
@@ -50,9 +53,12 @@ internal sealed class AppearanceSettingsTests
         Assert.That(result, Is.EqualTo(new AppearancePreferences(ColourScheme.Forest, paletteId)));
     }
 
-    [TestCase("{}", ColourScheme.Hearth, null)]
-    [TestCase("{\"colourScheme\":\"unknown\",\"palette\":\"dark\"}", ColourScheme.Hearth, "dark")]
+    [TestCase("{}", ColourScheme.Forest, null)]
+    [TestCase("{\"colourScheme\":\"unknown\",\"palette\":\"dark\"}", ColourScheme.Forest, "dark")]
     [TestCase("{\"colourScheme\":\"Forest\",\"palette\":\"unknown\"}", ColourScheme.Forest, null)]
+    [TestCase("{\"colourScheme\":\"Hearth\",\"palette\":\"dark\"}", ColourScheme.Hearth, "dark")]
+    [TestCase("{\"colourScheme\":\"Catppuccin\",\"palette\":\"unknown\"}", ColourScheme.Catppuccin, null)]
+    [TestCase("{\"colourScheme\":\"2\"}", ColourScheme.Forest, null)]
     public void MissingOrUnknownChoicesFallBackIndependently(string json, ColourScheme scheme, string? paletteId)
     {
         File.WriteAllText(SettingsPath, json);
@@ -60,14 +66,20 @@ internal sealed class AppearanceSettingsTests
         Assert.That(error, Is.Null);
     }
 
-    [TestCase(null)]
-    [TestCase("light")]
-    [TestCase("dark")]
-    public void SavingRoundTripsAndPreservesOtherSettings(string? paletteId)
+    [TestCase(ColourScheme.Forest, null)]
+    [TestCase(ColourScheme.Forest, "light")]
+    [TestCase(ColourScheme.Forest, "dark")]
+    [TestCase(ColourScheme.Hearth, "dark")]
+    [TestCase(ColourScheme.Catppuccin, null)]
+    [TestCase(ColourScheme.Catppuccin, "latte")]
+    [TestCase(ColourScheme.Catppuccin, "frappe")]
+    [TestCase(ColourScheme.Catppuccin, "macchiato")]
+    [TestCase(ColourScheme.Catppuccin, "mocha")]
+    public void SavingRoundTripsAndPreservesOtherSettings(ColourScheme scheme, string? paletteId)
     {
         File.WriteAllText(SettingsPath, "{\"appearance\":\"Dark\",\"captureShortcut\":null,\"other\":{\"value\":17}}");
         var settings = new DesktopSettings(_folder);
-        var preferences = new AppearancePreferences(ColourScheme.Forest, paletteId);
+        var preferences = new AppearancePreferences(scheme, paletteId);
         Assert.That(settings.SaveAppearance(preferences), Is.Null);
         var document = JsonNode.Parse(File.ReadAllText(SettingsPath))!.AsObject();
         Assert.Multiple(() =>
@@ -88,9 +100,17 @@ internal sealed class AppearanceSettingsTests
     {
         File.WriteAllText(SettingsPath, "broken json");
         var settings = new DesktopSettings(_folder);
-        Assert.That(settings.LoadAppearance(out var error), Is.EqualTo(new AppearancePreferences()));
-        Assert.That(error, Is.Not.Null);
+        Assert.That(settings.LoadAppearance(out var error), Is.EqualTo(new AppearancePreferences(ColourScheme.Forest)));
+        Assert.That(error, Does.Contain("Forest"));
         Assert.That(settings.SaveAppearance(new AppearancePreferences(ColourScheme.Forest, "dark")), Is.Not.Null);
         Assert.That(File.ReadAllText(SettingsPath), Is.EqualTo("broken json"));
+    }
+
+    [Test]
+    public void MissingSettingsUseForestWithoutCreatingAFile()
+    {
+        Assert.That(new DesktopSettings(_folder).LoadAppearance(out var error), Is.EqualTo(new AppearancePreferences(ColourScheme.Forest)));
+        Assert.That(error, Is.Null);
+        Assert.That(File.Exists(SettingsPath), Is.False);
     }
 }

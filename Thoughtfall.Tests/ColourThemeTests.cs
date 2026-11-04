@@ -9,6 +9,25 @@ using Thoughtfall.Desktop;
 internal sealed class ColourThemeTests
 {
     [Test]
+    public void CatppuccinRegistersAllFourPalettesAndItsSystemAssignments()
+    {
+        var theme = ColourThemes.Get(ColourScheme.Catppuccin);
+        Assert.Multiple(() =>
+        {
+            Assert.That(theme.Palettes.Select(palette => palette.Id), Is.EqualTo(new[] { "latte", "frappe", "macchiato", "mocha" }));
+            Assert.That(theme.Palettes.Select(palette => palette.Name), Is.EqualTo(new[] { "Latte", "Frappé", "Macchiato", "Mocha" }));
+            Assert.That(
+                theme.Palettes.Select(palette => palette.BaseVariant),
+                Is.EqualTo(new[] { ThemeVariant.Light, ThemeVariant.Dark, ThemeVariant.Dark, ThemeVariant.Dark })
+            );
+            Assert.That(theme.ResolveVariant(null, PlatformThemeVariant.Light), Is.SameAs(theme.GetVariant("latte")));
+            Assert.That(theme.ResolveVariant(null, PlatformThemeVariant.Dark), Is.SameAs(theme.GetVariant("mocha")));
+            Assert.That(ColourThemes.Get((ColourScheme)999).Id, Is.EqualTo(ColourScheme.Forest));
+            Assert.That(new AppearancePreferences().ColourScheme, Is.EqualTo(ColourScheme.Forest));
+        });
+    }
+
+    [Test]
     public void ArbitraryNamesAndMultiplePalettesResolveIndependentlyOfTheirFallbacks()
     {
         var theme = new ColourTheme(ColourScheme.Forest, "Fixture", [Palette("dawn"), Palette("mist"), Palette("dusk")], "dawn", "dusk");
