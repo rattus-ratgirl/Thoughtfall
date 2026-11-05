@@ -33,6 +33,16 @@ internal static class ColourThemes
                 "latte",
                 "mocha"
             ),
+            new ColourTheme(
+                ColourScheme.Everforest,
+                "Everforest",
+                [
+                    Palette("Everforest", "soft-light", "Soft Light", ThemeVariant.Light),
+                    Palette("Everforest", "soft-dark", "Soft Dark", ThemeVariant.Dark),
+                ],
+                "soft-light",
+                "soft-dark"
+            ),
         ]);
 
     internal static ColourTheme Get(ColourScheme id) =>

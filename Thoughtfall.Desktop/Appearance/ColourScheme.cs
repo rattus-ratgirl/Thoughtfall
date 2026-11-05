@@ -6,4 +6,5 @@ internal enum ColourScheme
     Forest,
     Hearth,
     Catppuccin,
+    Everforest,
 }

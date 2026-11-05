@@ -76,4 +76,15 @@ if assets["project"]["restore"]["projectName"] == "Thoughtfall.Desktop":
         "Licence: MIT. Full notice: licenses/Catppuccin-MIT.txt",
         "",
     ])
+    shutil.copyfile(root / "packaging/licenses/Everforest-MIT.txt", destination / "Everforest-MIT.txt")
+    summary.extend([
+        "## Everforest Soft palettes",
+        "",
+        "Copyright (c) 2019 sainnhe",
+        "",
+        "Source: https://github.com/sainnhe/everforest",
+        "",
+        "Licence: MIT. Full notice: licenses/Everforest-MIT.txt",
+        "",
+    ])
 (publish / "THIRD-PARTY-NOTICES.md").write_text("\n".join(summary), encoding="utf-8")

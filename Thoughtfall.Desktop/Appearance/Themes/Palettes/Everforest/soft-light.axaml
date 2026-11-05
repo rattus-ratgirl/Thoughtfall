@@ -1,0 +1,66 @@
+<local:PaletteResources
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:Thoughtfall.Desktop.Appearance"
+>
+    <!-- Everforest Soft palette, MIT. See packaging/licenses/Everforest-MIT.txt.
+         Source: https://github.com/sainnhe/everforest/blob/master/autoload/everforest.vim -->
+    <local:PaletteResources.FluentColours>
+        <ColorPaletteResources
+            Accent="#8da101"
+            RegionColor="#f3ead3"
+            AltHigh="#eae4ca"
+            AltMediumHigh="#CCeae4ca"
+            AltMedium="#99eae4ca"
+            AltMediumLow="#66eae4ca"
+            AltLow="#33eae4ca"
+            BaseHigh="#5c6a72"
+            BaseMediumHigh="#5c6a72"
+            BaseMedium="#708089"
+            BaseMediumLow="#829181"
+            BaseLow="#b9c0ab"
+            ChromeHigh="#939f91"
+            ChromeMedium="#b9c0ab"
+            ChromeMediumLow="#e5dfc5"
+            ChromeLow="#eae4ca"
+            ChromeAltLow="#eae4ca"
+            ChromeWhite="#f3ead3"
+            ChromeBlackHigh="#e5dfc5"
+            ChromeBlackMedium="#CCe5dfc5"
+            ChromeBlackMediumLow="#66e5dfc5"
+            ChromeBlackLow="#33e5dfc5"
+            ChromeDisabledHigh="#e5dfc5"
+            ChromeDisabledLow="#939f91"
+            ChromeGray="#829181"
+            ListLow="#e5dfc5"
+            ListMedium="#b9c0ab"
+            ErrorText="#f85552"
+        />
+    </local:PaletteResources.FluentColours>
+    <!-- Hover and pressed fills mix Green towards the palette background by 10% and 20%. -->
+    <SolidColorBrush x:Key="PageBrush" Color="#f3ead3" />
+    <SolidColorBrush x:Key="SurfaceBrush" Color="#eae4ca" />
+    <SolidColorBrush x:Key="SurfaceHoverBrush" Color="#e5dfc5" />
+    <SolidColorBrush x:Key="StrokeBrush" Color="#b9c0ab" />
+    <SolidColorBrush x:Key="TextBrush" Color="#5c6a72" />
+    <SolidColorBrush x:Key="MutedTextBrush" Color="#5c6a72" />
+    <SolidColorBrush x:Key="AccentBrush" Color="#8da101" />
+    <SolidColorBrush x:Key="PrimaryBrush" Color="#8da101" />
+    <SolidColorBrush x:Key="PrimaryHoverBrush" Color="#97a816" />
+    <SolidColorBrush x:Key="PrimaryPressedBrush" Color="#a1b02b" />
+    <SolidColorBrush x:Key="PrimaryTextBrush" Color="#293136" />
+    <SolidColorBrush x:Key="SelectionBrush" Color="#40e1e4bd" />
+    <SolidColorBrush x:Key="NoticeBrush" Color="#e5dfc5" />
+    <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#97a816" />
+    <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#a1b02b" />
+    <SolidColorBrush x:Key="AccentButtonForeground" Color="#293136" />
+    <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="#293136" />
+    <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="#293136" />
+    <SolidColorBrush x:Key="CalendarViewTodayForeground" Color="#293136" />
+    <SolidColorBrush x:Key="ComboBoxItemBackgroundSelected" Color="#8da101" />
+    <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPointerOver" Color="#97a816" />
+    <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPressed" Color="#a1b02b" />
+    <SolidColorBrush x:Key="ComboBoxItemForegroundSelected" Color="#293136" />
+    <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedPointerOver" Color="#293136" />
+    <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedPressed" Color="#293136" />
+</local:PaletteResources>
