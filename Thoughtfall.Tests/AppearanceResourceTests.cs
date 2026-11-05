@@ -317,6 +317,7 @@ internal sealed class AppearanceResourceTests
         var app = (App)Application.Current!;
         var before = app.RequestedThemeVariant;
         AppearancePreferences? saved = null;
+        var capture = new Thoughtfall.Desktop.Capture.CaptureWindow();
         var dialog = new AppearanceDialog(
             new AppearancePreferences(),
             preferences =>
@@ -331,7 +332,14 @@ internal sealed class AppearanceResourceTests
         );
         try
         {
+            capture.Show();
             dialog.Show();
+            var editor = capture.FindControl<TextBox>("Editor")!;
+            var fontSize = dialog.FindControl<ComboBox>("FontSizeBox")!;
+            Assert.That(fontSize.Items.Cast<int>(), Is.EqualTo(new[] { 10, 11, 12, 14, 16, 18, 20, 24 }));
+            Assert.That(fontSize.SelectedItem, Is.EqualTo(16));
+            fontSize.SelectedItem = 24;
+            Assert.That(editor.FontSize, Is.EqualTo(16));
             var scheme = dialog.FindControl<ComboBox>("SchemePicker")!;
             var palette = dialog.FindControl<ComboBox>("ModePicker")!;
             scheme.SelectedItem = ColourThemes.Get(ColourScheme.Hearth);
@@ -348,13 +356,16 @@ internal sealed class AppearanceResourceTests
             save.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             Assert.Multiple(() =>
             {
-                Assert.That(saved, Is.EqualTo(failSave ? null : new AppearancePreferences(ColourScheme.Hearth, "dark")));
+                Assert.That(saved, Is.EqualTo(failSave ? null : new AppearancePreferences(ColourScheme.Hearth, "dark", 24)));
+                Assert.That(editor.FontSize, Is.EqualTo(failSave ? 16 : 24));
+                Assert.That(editor.LineHeight, Is.EqualTo(failSave ? 26 : 39));
                 Assert.That(dialog.IsVisible, Is.EqualTo(failSave));
                 Assert.That(app.RequestedThemeVariant, Is.EqualTo(failSave ? before : ColourThemes.Get(ColourScheme.Hearth).GetVariant("dark")));
             });
         }
         finally
         {
+            capture.CloseForExit();
             dialog.Close();
         }
     }

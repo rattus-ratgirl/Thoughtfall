@@ -1,35 +1,39 @@
 <Window
-    xmlns="https://github.com/avaloniaui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    x:Class="Thoughtfall.Desktop.Appearance.AppearanceDialog"
-    x:ClassModifier="internal"
+    CanResize="False"
+    SizeToContent="Height"
     Title="Appearance"
     Width="420"
-    SizeToContent="Height"
-    CanResize="False"
     WindowStartupLocation="CenterOwner"
+    x:Class="Thoughtfall.Desktop.Appearance.AppearanceDialog"
+    x:ClassModifier="internal"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 >
     <StackPanel Margin="28" Spacing="18">
-        <TextBlock Text="Appearance" FontSize="24" FontWeight="SemiBold" />
+        <TextBlock FontSize="24" FontWeight="SemiBold" Text="Appearance" />
         <StackPanel Spacing="6">
-            <Label Content="_Colour scheme" Target="{Binding #SchemePicker}" Padding="0" />
-            <ComboBox x:Name="SchemePicker" HorizontalAlignment="Stretch" AutomationProperties.Name="Colour scheme" />
+            <Label Content="_Editor Font Size" Padding="0" Target="{Binding #FontSizeBox}" />
+            <ComboBox AutomationProperties.Name="Font size" HorizontalAlignment="Stretch" x:Name="FontSizeBox" />
         </StackPanel>
         <StackPanel Spacing="6">
-            <Label Content="_Palette" Target="{Binding #ModePicker}" Padding="0" />
-            <ComboBox x:Name="ModePicker" HorizontalAlignment="Stretch" AutomationProperties.Name="Palette" />
+            <Label Content="_Colour scheme" Padding="0" Target="{Binding #SchemePicker}" />
+            <ComboBox AutomationProperties.Name="Colour scheme" HorizontalAlignment="Stretch" x:Name="SchemePicker" />
+        </StackPanel>
+        <StackPanel Spacing="6">
+            <Label Content="_Palette" Padding="0" Target="{Binding #ModePicker}" />
+            <ComboBox AutomationProperties.Name="Palette" HorizontalAlignment="Stretch" x:Name="ModePicker" />
             <TextBlock
-                Text="Changes apply when saved. Match System follows your desktop's light or dark setting."
                 Classes="secondary"
+                Text="Changes apply when saved. Match System follows your desktop's light or dark setting."
                 TextWrapping="Wrap"
             />
         </StackPanel>
-        <Border x:Name="ErrorBanner" Classes="notice" IsVisible="False">
-            <TextBlock x:Name="ErrorText" TextWrapping="Wrap" FontSize="12" />
+        <Border Classes="notice" IsVisible="False" x:Name="ErrorBanner">
+            <TextBlock FontSize="12" TextWrapping="Wrap" x:Name="ErrorText" />
         </Border>
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
-            <Button Content="Cancel" MinWidth="88" Classes="quiet" IsCancel="True" Click="OnCancel" />
-            <Button Content="Save" MinWidth="88" Classes="primary" Click="OnSave" />
+        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
+            <Button Classes="quiet" Click="OnCancel" Content="Cancel" IsCancel="True" MinWidth="88" />
+            <Button Classes="primary" Click="OnSave" Content="Save" MinWidth="88" />
         </StackPanel>
     </StackPanel>
 </Window>

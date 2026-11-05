@@ -94,6 +94,8 @@ internal partial class App : Avalonia.Application
     internal void ApplyAppearance(AppearancePreferences preferences)
     {
         _appearance = preferences;
+        Resources["EditorFontSize"] = (double)preferences.EditorFontSize;
+        Resources["EditorLineHeight"] = preferences.EditorFontSize * 1.625;
         RequestedThemeVariant = ColourThemes.Get(preferences.ColourScheme).ResolveVariant(preferences.PaletteId, _systemAppearance);
     }
 

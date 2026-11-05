@@ -113,6 +113,37 @@ internal sealed class AppearanceSettingsTests
         Assert.That((int)JsonNode.Parse(File.ReadAllText(SettingsPath))!["other"]!, Is.EqualTo(17));
     }
 
+    [TestCase(10)]
+    [TestCase(11)]
+    [TestCase(12)]
+    [TestCase(14)]
+    [TestCase(16)]
+    [TestCase(18)]
+    [TestCase(20)]
+    [TestCase(24)]
+    public void EditorFontSizeSurvivesSavingOtherSettings(int fontSize)
+    {
+        var settings = new DesktopSettings(_folder);
+        var preferences = new AppearancePreferences(EditorFontSize: fontSize);
+        Assert.That(settings.SaveAppearance(preferences), Is.Null);
+        Assert.That(settings.SaveShortcut(CaptureShortcut.Default), Is.Null);
+        Assert.That(new DesktopSettings(_folder).LoadAppearance(out _), Is.EqualTo(preferences));
+    }
+
+    [TestCase("null")]
+    [TestCase("\"20\"")]
+    [TestCase("13")]
+    [TestCase("-1")]
+    [TestCase("18.5")]
+    [TestCase("{}")]
+    public void UnsupportedEditorFontSizeUsesDefaultWithoutDiscardingPalette(string value)
+    {
+        File.WriteAllText(SettingsPath, "{\"colourScheme\":\"Hearth\",\"palette\":\"dark\",\"editorFontSize\":" + value + "}");
+        var preferences = new DesktopSettings(_folder).LoadAppearance(out var error);
+        Assert.That(error, Is.Null);
+        Assert.That(preferences, Is.EqualTo(new AppearancePreferences(ColourScheme.Hearth, "dark", 16)));
+    }
+
     [Test]
     public void CorruptSettingsAreReportedAndNeverOverwritten()
     {

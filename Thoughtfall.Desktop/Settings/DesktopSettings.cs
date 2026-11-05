@@ -47,7 +47,13 @@ internal sealed class DesktopSettings(string folder)
                 paletteId = null;
 
             error = null;
-            return new AppearancePreferences(scheme, paletteId);
+            var fontSize =
+                document["editorFontSize"] is JsonValue value
+                && value.TryGetValue<int>(out var size)
+                && AppearancePreferences.EditorFontSizes.Contains(size)
+                    ? size
+                    : new AppearancePreferences().EditorFontSize;
+            return new AppearancePreferences(scheme, paletteId, fontSize);
         }
         catch (Exception ex) when (IsSettingsError(ex))
         {
@@ -63,6 +69,7 @@ internal sealed class DesktopSettings(string folder)
             var document = ReadDocument();
             document["colourScheme"] = preferences.ColourScheme.ToString();
             document["palette"] = preferences.PaletteId;
+            document["editorFontSize"] = preferences.EditorFontSize;
             document.Remove("appearance");
             WriteDocument(document);
             return null;

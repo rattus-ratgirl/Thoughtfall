@@ -12,6 +12,8 @@ internal partial class AppearanceDialog : Window
     public AppearanceDialog()
     {
         InitializeComponent();
+        FontSizeBox.ItemsSource = AppearancePreferences.EditorFontSizes;
+        FontSizeBox.SelectedItem = new AppearancePreferences().EditorFontSize;
         SchemePicker.ItemsSource = ColourThemes.All;
         SchemePicker.SelectedItem = ColourThemes.Get(new AppearancePreferences().ColourScheme);
         SetPalettes(null);
@@ -22,6 +24,7 @@ internal partial class AppearanceDialog : Window
         : this()
     {
         _save = save;
+        FontSizeBox.SelectedItem = saved.EditorFontSize;
         SchemePicker.SelectedItem = ColourThemes.Get(saved.ColourScheme);
         SetPalettes(saved.PaletteId);
         SetError(error);
@@ -29,10 +32,15 @@ internal partial class AppearanceDialog : Window
 
     private void OnSave(object? sender, RoutedEventArgs e)
     {
-        if (_save is null || SchemePicker.SelectedItem is not ColourTheme theme || ModePicker.SelectedItem is not PaletteChoice palette)
+        if (
+            _save is null
+            || SchemePicker.SelectedItem is not ColourTheme theme
+            || ModePicker.SelectedItem is not PaletteChoice palette
+            || FontSizeBox.SelectedItem is not int fontSize
+        )
             return;
 
-        var preferences = new AppearancePreferences(theme.Id, palette.Id);
+        var preferences = new AppearancePreferences(theme.Id, palette.Id, fontSize);
         var error = _save(preferences);
         if (error is not null)
         {
