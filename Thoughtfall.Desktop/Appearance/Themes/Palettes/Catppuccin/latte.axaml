@@ -1,0 +1,65 @@
+<local:PaletteResources
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:Thoughtfall.Desktop.Appearance"
+>
+    <!-- Catppuccin palette v1.8.0, MIT. See packaging/licenses/Catppuccin-MIT.txt. -->
+    <local:PaletteResources.FluentColours>
+        <ColorPaletteResources
+            Accent="#8839ef"
+            RegionColor="#eff1f5"
+            AltHigh="#e6e9ef"
+            AltMediumHigh="#CCe6e9ef"
+            AltMedium="#99e6e9ef"
+            AltMediumLow="#66e6e9ef"
+            AltLow="#33e6e9ef"
+            BaseHigh="#4c4f69"
+            BaseMediumHigh="#5c5f77"
+            BaseMedium="#6c6f85"
+            BaseMediumLow="#8c8fa1"
+            BaseLow="#bcc0cc"
+            ChromeHigh="#9ca0b0"
+            ChromeMedium="#bcc0cc"
+            ChromeMediumLow="#ccd0da"
+            ChromeLow="#e6e9ef"
+            ChromeAltLow="#e6e9ef"
+            ChromeWhite="#eff1f5"
+            ChromeBlackHigh="#dce0e8"
+            ChromeBlackMedium="#CCdce0e8"
+            ChromeBlackMediumLow="#66dce0e8"
+            ChromeBlackLow="#33dce0e8"
+            ChromeDisabledHigh="#ccd0da"
+            ChromeDisabledLow="#9ca0b0"
+            ChromeGray="#8c8fa1"
+            ListLow="#ccd0da"
+            ListMedium="#bcc0cc"
+            ErrorText="#d20f39"
+        />
+    </local:PaletteResources.FluentColours>
+    <!-- Hover and pressed fills mix Mauve towards Text by 10% and 20%. -->
+    <SolidColorBrush x:Key="PageBrush" Color="#eff1f5" />
+    <SolidColorBrush x:Key="SurfaceBrush" Color="#e6e9ef" />
+    <SolidColorBrush x:Key="SurfaceHoverBrush" Color="#ccd0da" />
+    <SolidColorBrush x:Key="StrokeBrush" Color="#bcc0cc" />
+    <SolidColorBrush x:Key="TextBrush" Color="#4c4f69" />
+    <SolidColorBrush x:Key="MutedTextBrush" Color="#5c5f77" />
+    <SolidColorBrush x:Key="AccentBrush" Color="#8839ef" />
+    <SolidColorBrush x:Key="PrimaryBrush" Color="#8839ef" />
+    <SolidColorBrush x:Key="PrimaryHoverBrush" Color="#823be2" />
+    <SolidColorBrush x:Key="PrimaryPressedBrush" Color="#7c3dd4" />
+    <SolidColorBrush x:Key="PrimaryTextBrush" Color="#eff1f5" />
+    <SolidColorBrush x:Key="SelectionBrush" Color="#407c7f93" />
+    <SolidColorBrush x:Key="NoticeBrush" Color="#ccd0da" />
+    <SolidColorBrush x:Key="AccentButtonBackgroundPointerOver" Color="#823be2" />
+    <SolidColorBrush x:Key="AccentButtonBackgroundPressed" Color="#7c3dd4" />
+    <SolidColorBrush x:Key="AccentButtonForeground" Color="#eff1f5" />
+    <SolidColorBrush x:Key="AccentButtonForegroundPointerOver" Color="#eff1f5" />
+    <SolidColorBrush x:Key="AccentButtonForegroundPressed" Color="#eff1f5" />
+    <SolidColorBrush x:Key="CalendarViewTodayForeground" Color="#eff1f5" />
+    <SolidColorBrush x:Key="ComboBoxItemBackgroundSelected" Color="#8839ef" />
+    <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPointerOver" Color="#823be2" />
+    <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPressed" Color="#7c3dd4" />
+    <SolidColorBrush x:Key="ComboBoxItemForegroundSelected" Color="#eff1f5" />
+    <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedPointerOver" Color="#eff1f5" />
+    <SolidColorBrush x:Key="ComboBoxItemForegroundSelectedPressed" Color="#eff1f5" />
+</local:PaletteResources>

@@ -7,6 +7,9 @@ using Avalonia.Platform;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using Thoughtfall.Application;
+using Thoughtfall.Desktop.Appearance;
+using Thoughtfall.Desktop.Settings;
+using Thoughtfall.Desktop.Shell;
 
 /// <summary>Connects the diary and instance owner to Avalonia's desktop lifetime.</summary>
 internal partial class App : Avalonia.Application
@@ -74,7 +77,7 @@ internal partial class App : Avalonia.Application
         )
         {
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
-            var controller = new ApplicationController(this, _store, desktop, _instance, _settings, _appearance, _appearanceError);
+            var controller = new ApplicationController(this, _store, desktop, _instance, _settings, _appearanceError);
             _instance.Listen(
                 () => Dispatcher.UIThread.Post(controller.ActivateCapture),
                 () => Dispatcher.UIThread.Post(controller.ShowActivationError)
@@ -85,6 +88,8 @@ internal partial class App : Avalonia.Application
 
         base.OnFrameworkInitializationCompleted();
     }
+
+    internal AppearancePreferences CurrentAppearance => _appearance;
 
     internal void ApplyAppearance(AppearancePreferences preferences)
     {

@@ -1,6 +1,6 @@
 # Colour themes
 
-`Thoughtfall.Desktop/ColourThemes.cs` lists the built-in colour themes. Each
+`Thoughtfall.Desktop/Appearance/ColourThemes.cs` lists the built-in colour themes. Each
 theme has an ordered collection of palettes and two system assignments:
 `SystemLightPaletteId` and `SystemDarkPaletteId`. Both assignments are required
 and must reference palettes in that theme. They can reference the same palette,
@@ -16,7 +16,7 @@ palette's name or its system assignment.
 To add a palette to an existing theme:
 
 1. Add a `Palette(...)` entry to that theme's collection in `ColourThemes.cs`.
-2. Add `Themes/Palettes/<theme>/<id>.axaml`, using `PaletteResources` as the root.
+2. Add `Appearance/Themes/Palettes/<theme>/<id>.axaml`, using `PaletteResources` as the root.
 3. Set `FluentColours` and provide the application brushes found in the existing
    palette files. Put any palette-specific Fluent brush overrides alongside them.
 4. Change the system assignments only if the new palette should participate in

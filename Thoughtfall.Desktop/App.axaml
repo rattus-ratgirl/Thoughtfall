@@ -8,6 +8,6 @@
     <Application.Styles>
         <FluentTheme />
         <!-- App.Initialize inserts the named palettes here, before shared styles. -->
-        <StyleInclude Source="/Themes/Thoughtfall.axaml" />
+        <StyleInclude Source="/Appearance/Themes/Thoughtfall.axaml" />
     </Application.Styles>
 </Application>

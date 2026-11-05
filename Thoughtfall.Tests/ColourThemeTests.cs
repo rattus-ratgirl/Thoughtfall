@@ -4,6 +4,7 @@ using Avalonia.Platform;
 using Avalonia.Styling;
 using NUnit.Framework;
 using Thoughtfall.Desktop;
+using Thoughtfall.Desktop.Appearance;
 
 /// <summary>Checks palette identities and unambiguous system assignments.</summary>
 internal sealed class ColourThemeTests

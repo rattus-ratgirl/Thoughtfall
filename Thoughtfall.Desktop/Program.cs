@@ -2,6 +2,8 @@ namespace Thoughtfall.Desktop;
 
 using Avalonia;
 using Thoughtfall.Application;
+using Thoughtfall.Desktop.Diagnostics;
+using Thoughtfall.Desktop.Shell;
 
 /// <summary>Starts the desktop application or activates its running instance.</summary>
 internal static class Program

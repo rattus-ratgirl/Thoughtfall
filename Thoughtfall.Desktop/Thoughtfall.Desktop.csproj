@@ -15,4 +15,9 @@
     <ItemGroup>
         <InternalsVisibleTo Include="Thoughtfall.Tests" />
     </ItemGroup>
+    <ItemGroup>
+        <Compile Update="Appearance\AppearanceDialog.axaml.cs">
+            <DependentUpon>AppearanceDialog.axaml</DependentUpon>
+        </Compile>
+    </ItemGroup>
 </Project>

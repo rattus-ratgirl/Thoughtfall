@@ -3,6 +3,9 @@ namespace Thoughtfall.Tests;
 using System.Text.Json.Nodes;
 using NUnit.Framework;
 using Thoughtfall.Desktop;
+using Thoughtfall.Desktop.Appearance;
+using Thoughtfall.Desktop.Settings;
+using Thoughtfall.Desktop.Shortcuts;
 
 /// <summary>Checks settings migration and preserves unrelated desktop preferences.</summary>
 internal sealed class AppearanceSettingsTests
@@ -93,6 +96,21 @@ internal sealed class AppearanceSettingsTests
         });
         Assert.That(settings.SaveShortcut(CaptureShortcut.Default), Is.Null);
         Assert.That(settings.LoadAppearance(out _), Is.EqualTo(preferences));
+    }
+
+    [TestCase(false)]
+    [TestCase(true)]
+    public void InvalidStoredShortcutCanBeReplacedOrDisabled(bool disable)
+    {
+        File.WriteAllText(SettingsPath, """{"captureShortcut":{"key":"unsupported"},"other":17}""");
+        var settings = new DesktopSettings(_folder);
+        var candidate = disable ? null : CaptureShortcut.Default;
+        Assert.That(settings.LoadShortcut(out var error), Is.EqualTo(CaptureShortcut.Default));
+        Assert.That(error, Is.Not.Null);
+        Assert.That(settings.SaveShortcut(candidate), Is.Null);
+        Assert.That(settings.LoadShortcut(out error), Is.EqualTo(candidate));
+        Assert.That(error, Is.Null);
+        Assert.That((int)JsonNode.Parse(File.ReadAllText(SettingsPath))!["other"]!, Is.EqualTo(17));
     }
 
     [Test]

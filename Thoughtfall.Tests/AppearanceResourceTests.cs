@@ -15,6 +15,7 @@ using Avalonia.Threading;
 using Avalonia.VisualTree;
 using NUnit.Framework;
 using Thoughtfall.Desktop;
+using Thoughtfall.Desktop.Appearance;
 
 /// <summary>Exercises the compiled application resources and live variant switching.</summary>
 [NonParallelizable]
@@ -408,9 +409,9 @@ internal sealed class AppearanceResourceTests
             ColourScheme.Forest,
             "Fixture",
             [
-                new("dawn", "Dawn", ThemeVariant.Light, existing.Palettes[0].Source),
-                new("mist", "Mist", ThemeVariant.Light, existing.Palettes[0].Source),
-                new("dusk", "Dusk", ThemeVariant.Dark, existing.Palettes[1].Source),
+                new ColourPalette("dawn", "Dawn", ThemeVariant.Light, existing.Palettes[0].Source),
+                new ColourPalette("mist", "Mist", ThemeVariant.Light, existing.Palettes[0].Source),
+                new ColourPalette("dusk", "Dusk", ThemeVariant.Dark, existing.Palettes[1].Source),
             ],
             "dawn",
             "dusk"
