@@ -35,15 +35,21 @@ internal sealed class CaptureHistoryTests
         }
     }
 
-    [TestCase("en-GB", "Thursday, 5 November 2026 19:30")]
-    [TestCase("en-US", "Thursday, November 5, 2026 7:30 PM")]
-    [TestCase("de-DE", "Donnerstag, 5. November 2026 19:30")]
-    public void HistoryUsesTheCurrentCulture(string culture, string expected)
+    [TestCase("en-GB", "saved 05 November 2026 at 19:30")]
+    [TestCase("en-US", "saved 05 November 2026 at 19:30")]
+    [TestCase("de-DE", "saved 05 November 2026 at 19:30")]
+    [TestCase("fr-FR", "saved 05 novembre 2026 at 19:30")]
+    public void HistoryUsesUserDateAndTimePatterns(string culture, string expected)
     {
         var previous = CultureInfo.CurrentCulture;
         try
         {
-            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(culture);
+            // OS locale defaults differ. Explicit user patterns keep this assertion portable
+            // while checking that capture honours both date and time customisation.
+            var userCulture = (CultureInfo)CultureInfo.GetCultureInfo(culture).Clone();
+            userCulture.DateTimeFormat.LongDatePattern = "'saved' dd MMMM yyyy";
+            userCulture.DateTimeFormat.ShortTimePattern = "'at' HH':'mm";
+            CultureInfo.CurrentCulture = userCulture;
             var entry = new DiaryEntry(Guid.NewGuid(), new DateTimeOffset(2026, 11, 5, 19, 30, 0, TimeSpan.Zero), "  exact text\n");
             var history = new CaptureHistoryEntry(entry);
             Assert.That(history.Timestamp, Is.EqualTo(expected));
