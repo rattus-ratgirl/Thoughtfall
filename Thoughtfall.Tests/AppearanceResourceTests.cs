@@ -310,6 +310,135 @@ internal sealed class AppearanceResourceTests
         }
     }
 
+    [Test]
+    public void CaptureStartsAtDraftAndRequiresContinuedScrollingBeforeShowingHistory()
+    {
+        var folder = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"capture-history-{Guid.NewGuid():N}");
+        var store = new Thoughtfall.Application.DiaryStore(folder);
+        for (var i = 0; i < 35; i++)
+            store.SaveAsync($"Saved thought {i}").GetAwaiter().GetResult();
+        var capture = new Thoughtfall.Desktop.Capture.CaptureWindow(store);
+        try
+        {
+            capture.Show();
+            var load = capture.RefreshHistoryAsync();
+            CompleteOnUiThread(load);
+            capture.UpdateLayout();
+            var editor = capture.FindControl<TextBox>("Editor")!;
+            var scroll = capture.FindControl<ScrollViewer>("EntryScroller")!;
+            var history = capture.FindControl<ItemsControl>("History")!;
+            var hint = capture.FindControl<Border>("HistoryHint")!;
+            editor.Focus();
+            Dispatcher.UIThread.RunJobs();
+            var frame = capture.FindControl<Border>("CaptureFrame")!;
+            var editorBorder = editor.GetVisualDescendants().OfType<Border>().Single(border => border.Name == "PART_BorderElement");
+            Assert.That(editorBorder.BorderThickness, Is.EqualTo(new Thickness(0)));
+            Assert.That(frame.BorderBrush, Is.EqualTo(capture.FindResource(capture.ActualThemeVariant, "PrimaryBrush")));
+            Assert.That(frame.CornerRadius, Is.EqualTo(new CornerRadius(14)));
+            Assert.That(history.ItemCount, Is.EqualTo(30));
+            Assert.That(scroll.Offset.Y, Is.EqualTo(editor.Bounds.Top).Within(1));
+            Assert.That(hint.IsVisible, Is.False);
+            var point = scroll.TranslatePoint(new Point(50, 60), capture)!.Value;
+            var initialOffset = scroll.Offset.Y;
+            capture.MouseWheel(point, new Vector(0, 1));
+            Dispatcher.UIThread.RunJobs();
+            Assert.That(hint.IsVisible, Is.True);
+            Assert.That(scroll.Offset.Y, Is.EqualTo(initialOffset));
+
+            // Pausing dismisses the hint; the next gesture must start the delay again.
+            PumpUiFor(TimeSpan.FromMilliseconds(1100));
+            Assert.That(hint.IsVisible, Is.False);
+            capture.MouseWheel(point, new Vector(0, 1));
+            Assert.That(scroll.Offset.Y, Is.EqualTo(initialOffset));
+            for (var i = 0; i < 5; i++)
+            {
+                PumpUiFor(TimeSpan.FromMilliseconds(250));
+                capture.MouseWheel(point, new Vector(0, 1));
+                Dispatcher.UIThread.RunJobs();
+            }
+            Assert.That(hint.IsVisible, Is.False);
+            Assert.That(scroll.Offset.Y, Is.LessThan(initialOffset));
+            Assert.That(editor.Text, Is.Null.Or.Empty);
+            Assert.That(history.GetVisualDescendants().OfType<SelectableTextBlock>().Any(), Is.True);
+
+            scroll.Offset = new Vector(0, 50);
+            Dispatcher.UIThread.RunJobs();
+            CompleteOnUiThread(capture.HistoryLoad);
+            capture.UpdateLayout();
+            Assert.That(history.ItemCount, Is.EqualTo(35));
+            Assert.That(scroll.Offset.Y, Is.GreaterThan(50));
+        }
+        finally
+        {
+            capture.CloseForExit();
+            Directory.Delete(folder, true);
+        }
+    }
+
+    private static void CompleteOnUiThread(Task task)
+    {
+        var timeout = System.Diagnostics.Stopwatch.StartNew();
+        while (!task.IsCompleted && timeout.Elapsed < TimeSpan.FromSeconds(10))
+        {
+            Dispatcher.UIThread.RunJobs();
+            Thread.Sleep(1);
+        }
+        Assert.That(task.IsCompleted, Is.True, "History loading timed out.");
+        task.GetAwaiter().GetResult();
+        Dispatcher.UIThread.RunJobs();
+    }
+
+    [Test]
+    public void CaptureHistoryRefreshPreservesDraftAndRecoversFromReadFailure()
+    {
+        var folder = Path.Combine(TestContext.CurrentContext.WorkDirectory, $"capture-refresh-{Guid.NewGuid():N}");
+        var store = new Thoughtfall.Application.DiaryStore(folder);
+        var capture = new Thoughtfall.Desktop.Capture.CaptureWindow(store);
+        try
+        {
+            capture.Show();
+            var editor = capture.FindControl<TextBox>("Editor")!;
+            editor.Text = "Unsaved draft";
+            editor.CaretIndex = 4;
+            CompleteOnUiThread(capture.RefreshHistoryAsync());
+            var history = capture.FindControl<ItemsControl>("History")!;
+            Assert.That(history.ItemCount, Is.Zero);
+
+            store.SaveAsync("Captured elsewhere").GetAwaiter().GetResult();
+            CompleteOnUiThread(capture.RefreshHistoryAsync());
+            Assert.That(history.Items.Cast<Thoughtfall.Desktop.Capture.CaptureHistoryEntry>().Single().Text, Is.EqualTo("Captured elsewhere"));
+            Assert.That(editor.Text, Is.EqualTo("Unsaved draft"));
+            Assert.That(editor.CaretIndex, Is.EqualTo(4));
+
+            File.Move(store.FilePath, store.FilePath + ".backup");
+            File.WriteAllText(store.FilePath, "invalid database");
+            CompleteOnUiThread(capture.RefreshHistoryAsync());
+            Assert.That(capture.FindControl<TextBlock>("StatusText")!.Text, Does.Contain("Couldn't load previous entries"));
+            Assert.That(editor.Text, Is.EqualTo("Unsaved draft"));
+            Assert.That(editor.IsEnabled, Is.True);
+
+            File.Delete(store.FilePath);
+            File.Move(store.FilePath + ".backup", store.FilePath);
+            CompleteOnUiThread(capture.RefreshHistoryAsync());
+            Assert.That(capture.FindControl<Border>("StatusBanner")!.IsVisible, Is.False);
+        }
+        finally
+        {
+            capture.CloseForExit();
+            Directory.Delete(folder, true);
+        }
+    }
+
+    private static void PumpUiFor(TimeSpan duration)
+    {
+        var frame = new DispatcherFrame();
+        var timer = new DispatcherTimer { Interval = duration };
+        timer.Tick += (_, _) => frame.Continue = false;
+        timer.Start();
+        Dispatcher.UIThread.PushFrame(frame);
+        timer.Stop();
+    }
+
     [TestCase(false)]
     [TestCase(true)]
     public void DialogKeepsEditsLocalUntilSaveSucceeds(bool failSave)

@@ -93,6 +93,43 @@ public sealed class DiaryStore
         }
     }
 
+    /// <summary>Reads a bounded page before an entry, or the newest entries when no cursor is supplied.</summary>
+    /// <param name="before">The oldest entry already displayed, or null for the newest page.</param>
+    /// <param name="limit">The maximum number of entries to read.</param>
+    /// <returns>The page in insertion order, oldest first.</returns>
+    public async Task<IReadOnlyList<DiaryEntry>> ReadPreviousAsync(Guid? before, int limit = 30)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(limit);
+        await _gate.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            return await Task.Run(() =>
+                {
+                    using var connection = OpenDatabase();
+                    using var command = connection.CreateCommand();
+                    command.CommandText = before is null
+                        ? "SELECT id, timestamp, text FROM entries ORDER BY rowid DESC LIMIT $limit"
+                        : "SELECT id, timestamp, text FROM entries WHERE rowid < (SELECT rowid FROM entries WHERE id = $before) ORDER BY rowid DESC LIMIT $limit";
+                    command.Parameters.AddWithValue("$limit", limit);
+                    if (before is not null)
+                        command.Parameters.AddWithValue("$before", before.Value.ToString("D"));
+                    using var reader = command.ExecuteReader();
+                    var entries = ReadEntries(reader).ToList();
+                    entries.Reverse();
+                    return (IReadOnlyList<DiaryEntry>)entries;
+                })
+                .ConfigureAwait(false);
+        }
+        catch (SqliteException ex)
+        {
+            throw new IOException("The diary database could not be read. Check the data folder and retry.", ex);
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
     /// <summary>Writes an export outside the data directory, replacing the destination only after a successful write.</summary>
     /// <param name="destination">The local output path.</param>
     /// <param name="entries">The snapshot to export.</param>

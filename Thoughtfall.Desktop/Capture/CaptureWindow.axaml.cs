@@ -24,6 +24,7 @@ internal partial class CaptureWindow : Window
     public CaptureWindow()
     {
         InitializeComponent();
+        InitialiseHistory();
         AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel);
         EntryDate.Text = DateTime.Now.ToString("ddd, d MMM");
         ShortcutButton.IsVisible = OperatingSystem.IsWindows();
@@ -69,6 +70,7 @@ internal partial class CaptureWindow : Window
     /// <summary>Restores and activates capture, then focuses the editor.</summary>
     internal void ShowCapture()
     {
+        var refreshHistory = !IsVisible || WindowState == WindowState.Minimized || !_historyReady;
         var caret = Editor.CaretIndex;
         var selectionStart = Editor.SelectionStart;
         var selectionEnd = Editor.SelectionEnd;
@@ -76,6 +78,8 @@ internal partial class CaptureWindow : Window
         Show();
         WindowState = WindowState.Normal;
         Activate();
+        if (refreshHistory)
+            HistoryLoad = RefreshHistoryAsync();
         Dispatcher.UIThread.Post(
             () =>
             {
@@ -171,13 +175,15 @@ internal partial class CaptureWindow : Window
 
     private void RenderStatus()
     {
-        StatusText.Text = string.Join("\n\n", new[] { _operationStatus, _warnings }.Where(text => !string.IsNullOrEmpty(text)));
+        StatusText.Text = string.Join("\n\n", new[] { _operationStatus, _warnings, _historyError }.Where(text => !string.IsNullOrEmpty(text)));
         StatusBanner.IsVisible = !string.IsNullOrEmpty(StatusText.Text);
     }
 
     /// <summary>Closes capture without applying its normal hide-or-minimize behavior.</summary>
     internal void CloseForExit()
     {
+        _historyGeneration++;
+        _historyHintTimer.Stop();
         _closingForExit = true;
         Close();
     }

@@ -9,6 +9,7 @@
     x:Class="Thoughtfall.Desktop.Capture.CaptureWindow"
     x:ClassModifier="internal"
     xmlns="https://github.com/avaloniaui"
+    xmlns:capture="using:Thoughtfall.Desktop.Capture"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 >
     <Grid Margin="28,22,28,16" RowDefinitions="Auto,*,Auto,Auto,Auto">
@@ -28,19 +29,70 @@
                 <TextBlock Classes="secondary" x:Name="EntryDate" />
             </Border>
         </Grid>
-        <TextBox
-            AcceptsReturn="True"
-            AutomationProperties.Name="Diary entry"
-            Classes="journal"
+        <Border
+            Background="{DynamicResource SurfaceBrush}"
+            BorderThickness="1"
+            Classes="capture-frame"
+            ClipToBounds="True"
+            CornerRadius="14"
             Grid.Row="1"
-            MaxLength="0"
-            PlaceholderText="What's on your mind?"
-            ScrollViewer.VerticalScrollBarVisibility="Auto"
-            TextChanged="OnTextChanged"
-            TextWrapping="Wrap"
-            VerticalContentAlignment="Top"
-            x:Name="Editor"
-        />
+            x:Name="CaptureFrame"
+        >
+            <Grid>
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" x:Name="EntryScroller">
+                    <StackPanel x:Name="EntryStream">
+                        <ItemsControl Margin="22,0" x:Name="History">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="capture:CaptureHistoryEntry" x:DataType="capture:CaptureHistoryEntry">
+                                    <StackPanel Margin="0,18,0,0" Spacing="10">
+                                        <TextBlock Classes="secondary" Text="{Binding Timestamp}" />
+                                        <SelectableTextBlock
+                                            FontSize="{DynamicResource EditorFontSize}"
+                                            Foreground="{DynamicResource MutedTextBrush}"
+                                            LineHeight="{DynamicResource EditorLineHeight}"
+                                            Text="{Binding Text}"
+                                            TextWrapping="Wrap"
+                                        />
+                                        <Grid ColumnDefinitions="*,3*,*" Margin="0,10,0,0">
+                                            <Border Background="{DynamicResource StrokeBrush}" Grid.Column="1" Height="1" Opacity="0.5" />
+                                        </Grid>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBox
+                            AcceptsReturn="True"
+                            AutomationProperties.Name="Diary entry"
+                            BorderThickness="0"
+                            Classes="journal stream"
+                            CornerRadius="0"
+                            MaxLength="0"
+                            MinHeight="{Binding #EntryScroller.Viewport.Height}"
+                            PlaceholderText="What's on your mind?"
+                            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                            ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                            TextChanged="OnTextChanged"
+                            TextWrapping="Wrap"
+                            VerticalContentAlignment="Top"
+                            x:Name="Editor"
+                        />
+                    </StackPanel>
+                </ScrollViewer>
+                <Border
+                    Background="{DynamicResource SurfaceBrush}"
+                    CornerRadius="8"
+                    HorizontalAlignment="Center"
+                    IsHitTestVisible="False"
+                    IsVisible="False"
+                    Margin="12"
+                    Padding="12,8"
+                    VerticalAlignment="Top"
+                    x:Name="HistoryHint"
+                >
+                    <TextBlock Classes="secondary" Text="Continue scrolling to see previous entries" TextWrapping="Wrap" />
+                </Border>
+            </Grid>
+        </Border>
         <Border Classes="notice" Grid.Row="2" IsVisible="False" Margin="0,12,0,0" x:Name="StatusBanner">
             <ScrollViewer MaxHeight="100">
                 <TextBlock FontSize="12" TextWrapping="Wrap" x:Name="StatusText" />
@@ -51,8 +103,10 @@
                 <TextBlock Classes="secondary" FontSize="11" Text="Ctrl + Enter" />
             </Border>
             <TextBlock Classes="secondary" Text="to save" VerticalAlignment="Center" />
-            <Button Classes="quiet" Click="OnCaptureShortcut" Content="Capture shortcut…" IsVisible="False" x:Name="ShortcutButton" />
-            <Button Classes="quiet" Click="OnAppearance" Content="Appearance…" x:Name="AppearanceButton" />
+        </StackPanel>
+        <StackPanel Grid.Row="3" HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8">
+            <Button Classes="quiet" Click="OnCaptureShortcut" Content="Change Capture shortcut" IsVisible="False" x:Name="ShortcutButton" />
+            <Button Classes="quiet" Click="OnAppearance" Content="Appearance" x:Name="AppearanceButton" />
         </StackPanel>
         <Border BorderBrush="{DynamicResource StrokeBrush}" BorderThickness="0,1,0,0" Grid.Row="4" Padding="0,12,0,0">
             <Grid ColumnDefinitions="*,Auto">
