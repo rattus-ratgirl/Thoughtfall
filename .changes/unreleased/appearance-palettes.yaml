@@ -1,3 +1,0 @@
-kind: Added
-body: Allow colour themes to define any number of named palettes, with one or two designated for Match System. Colour scheme and palette changes now apply without restarting.
-time: 2026-11-03T22:01:37.3702661+00:00
